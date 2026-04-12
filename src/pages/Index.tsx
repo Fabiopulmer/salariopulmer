@@ -282,6 +282,12 @@ const Index = () => {
                 <span>INSS: −{formatCurrency(inss)}</span>
                 <span className="hidden sm:inline">•</span>
                 <span>IRRF: {irrf > 0 ? `−${formatCurrency(irrf)}` : "Isento"}</span>
+                {outrosDescontosNum > 0 && (
+                  <>
+                    <span className="hidden sm:inline">•</span>
+                    <span>Outros: −{formatCurrency(outrosDescontosNum)}</span>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>
