@@ -134,22 +134,63 @@ const Index = () => {
             </CardContent>
           </Card>
 
+          {/* DSR */}
+          <Card className="border-none shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-muted-foreground">DSR</p>
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {formatCurrency(dsr)}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {formatCurrency(comissao)} / {diasUteisNum} × {domingosFeriadosNum}
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Salário Total */}
           <Card className="border-none bg-primary shadow-md">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-primary-foreground/80">Salário Total</p>
+                <p className="text-sm font-medium text-primary-foreground/80">Salário Bruto</p>
                 <DollarSign className="h-4 w-4 text-primary-foreground/80" />
               </div>
               <p className="mt-2 text-3xl font-bold text-primary-foreground">
                 {formatCurrency(salarioTotal)}
               </p>
               <p className="mt-1 text-xs text-primary-foreground/70">
-                Fixo + Comissão
+                Fixo + Comissão + DSR
               </p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Detalhamento */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Detalhamento do Salário</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 text-sm">
+              {[
+                { label: "Salário Fixo", value: salarioNum },
+                { label: `Comissão (${aliquota}% sobre faturamento)`, value: comissao },
+                { label: `DSR (${formatCurrency(comissao)} ÷ ${diasUteisNum} × ${domingosFeriadosNum})`, value: dsr },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between border-b pb-3 last:border-0">
+                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className="font-medium text-foreground">{formatCurrency(item.value)}</span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-base font-bold text-foreground">Salário Bruto Total</span>
+                <span className="text-base font-bold text-primary">{formatCurrency(salarioTotal)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Footer table */}
         <Card>
