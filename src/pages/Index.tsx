@@ -49,6 +49,7 @@ const Index = () => {
   const salarioNum = parseFloat(salarioFixo) || 0;
   const diasUteisNum = parseFloat(diasUteis) || 1;
   const domingosFeriadosNum = parseFloat(domingosFeriados) || 0;
+  const outrosDescontosNum = parseFloat(outrosDescontos) || 0;
 
   const atingimento = metaNum > 0 ? (fatNum / metaNum) * 100 : 0;
   const aliquota = atingimento < 85 ? 0.5 : atingimento < 100 ? 0.75 : 1.0;
