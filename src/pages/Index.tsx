@@ -12,15 +12,20 @@ const Index = () => {
   const [meta, setMeta] = useState("");
   const [faturamento, setFaturamento] = useState("");
   const [salarioFixo, setSalarioFixo] = useState("1993.00");
+  const [diasUteis, setDiasUteis] = useState("26");
+  const [domingosFeriados, setDomingosFeriados] = useState("5");
 
   const metaNum = parseFloat(meta) || 0;
   const fatNum = parseFloat(faturamento) || 0;
   const salarioNum = parseFloat(salarioFixo) || 0;
+  const diasUteisNum = parseFloat(diasUteis) || 1;
+  const domingosFeriadosNum = parseFloat(domingosFeriados) || 0;
 
   const atingimento = metaNum > 0 ? (fatNum / metaNum) * 100 : 0;
   const aliquota = atingimento < 85 ? 0.5 : atingimento < 100 ? 0.75 : 1.0;
   const comissao = fatNum * (aliquota / 100);
-  const salarioTotal = salarioNum + comissao;
+  const dsr = (comissao / diasUteisNum) * domingosFeriadosNum;
+  const salarioTotal = salarioNum + comissao + dsr;
 
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
