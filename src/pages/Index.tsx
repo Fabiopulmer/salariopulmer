@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Target, TrendingUp, DollarSign, Percent, Calculator } from "lucide-react";
+import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays } from "lucide-react";
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -12,15 +12,20 @@ const Index = () => {
   const [meta, setMeta] = useState("");
   const [faturamento, setFaturamento] = useState("");
   const [salarioFixo, setSalarioFixo] = useState("1993.00");
+  const [diasUteis, setDiasUteis] = useState("26");
+  const [domingosFeriados, setDomingosFeriados] = useState("5");
 
   const metaNum = parseFloat(meta) || 0;
   const fatNum = parseFloat(faturamento) || 0;
   const salarioNum = parseFloat(salarioFixo) || 0;
+  const diasUteisNum = parseFloat(diasUteis) || 1;
+  const domingosFeriadosNum = parseFloat(domingosFeriados) || 0;
 
   const atingimento = metaNum > 0 ? (fatNum / metaNum) * 100 : 0;
   const aliquota = atingimento < 85 ? 0.5 : atingimento < 100 ? 0.75 : 1.0;
   const comissao = fatNum * (aliquota / 100);
-  const salarioTotal = salarioNum + comissao;
+  const dsr = (comissao / diasUteisNum) * domingosFeriadosNum;
+  const salarioTotal = salarioNum + comissao + dsr;
 
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
@@ -49,42 +54,33 @@ const Index = () => {
             <CardTitle className="text-lg">Dados do Mês</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <div className="space-y-2">
                 <Label htmlFor="meta">Meta do Mês (R$)</Label>
-                <Input
-                  id="meta"
-                  type="number"
-                  placeholder="0,00"
-                  value={meta}
-                  onChange={(e) => setMeta(e.target.value)}
-                />
+                <Input id="meta" type="number" placeholder="0,00" value={meta} onChange={(e) => setMeta(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="faturamento">Faturamento Realizado (R$)</Label>
-                <Input
-                  id="faturamento"
-                  type="number"
-                  placeholder="0,00"
-                  value={faturamento}
-                  onChange={(e) => setFaturamento(e.target.value)}
-                />
+                <Input id="faturamento" type="number" placeholder="0,00" value={faturamento} onChange={(e) => setFaturamento(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="salario">Salário Fixo (R$)</Label>
-                <Input
-                  id="salario"
-                  type="number"
-                  value={salarioFixo}
-                  onChange={(e) => setSalarioFixo(e.target.value)}
-                />
+                <Input id="salario" type="number" value={salarioFixo} onChange={(e) => setSalarioFixo(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="diasUteis">Dias Úteis</Label>
+                <Input id="diasUteis" type="number" value={diasUteis} onChange={(e) => setDiasUteis(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="domingos">Domingos/Feriados</Label>
+                <Input id="domingos" type="number" value={domingosFeriados} onChange={(e) => setDomingosFeriados(e.target.value)} />
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Result Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {/* Atingimento */}
           <Card className="border-none shadow-md">
             <CardContent className="pt-6">
@@ -138,22 +134,63 @@ const Index = () => {
             </CardContent>
           </Card>
 
+          {/* DSR */}
+          <Card className="border-none shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-muted-foreground">DSR</p>
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {formatCurrency(dsr)}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {formatCurrency(comissao)} / {diasUteisNum} × {domingosFeriadosNum}
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Salário Total */}
           <Card className="border-none bg-primary shadow-md">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-primary-foreground/80">Salário Total</p>
+                <p className="text-sm font-medium text-primary-foreground/80">Salário Bruto</p>
                 <DollarSign className="h-4 w-4 text-primary-foreground/80" />
               </div>
               <p className="mt-2 text-3xl font-bold text-primary-foreground">
                 {formatCurrency(salarioTotal)}
               </p>
               <p className="mt-1 text-xs text-primary-foreground/70">
-                Fixo + Comissão
+                Fixo + Comissão + DSR
               </p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Detalhamento */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Detalhamento do Salário</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 text-sm">
+              {[
+                { label: "Salário Fixo", value: salarioNum },
+                { label: `Comissão (${aliquota}% sobre faturamento)`, value: comissao },
+                { label: `DSR (${formatCurrency(comissao)} ÷ ${diasUteisNum} × ${domingosFeriadosNum})`, value: dsr },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between border-b pb-3 last:border-0">
+                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className="font-medium text-foreground">{formatCurrency(item.value)}</span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-base font-bold text-foreground">Salário Bruto Total</span>
+                <span className="text-base font-bold text-primary">{formatCurrency(salarioTotal)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Footer table */}
         <Card>
