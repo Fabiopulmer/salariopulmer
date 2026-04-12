@@ -59,7 +59,7 @@ const Index = () => {
 
   const inss = calcINSS(salarioBruto);
   const irrf = calcIRRF(salarioBruto, inss);
-  const salarioLiquido = salarioBruto - inss - irrf;
+  const salarioLiquido = salarioBruto - inss - irrf - outrosDescontosNum;
 
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
