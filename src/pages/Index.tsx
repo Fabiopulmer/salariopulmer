@@ -42,12 +42,14 @@ const Index = () => {
   const [salarioFixo, setSalarioFixo] = useState("1993.00");
   const [diasUteis, setDiasUteis] = useState("26");
   const [domingosFeriados, setDomingosFeriados] = useState("5");
+  const [outrosDescontos, setOutrosDescontos] = useState("0");
 
   const metaNum = parseFloat(meta) || 0;
   const fatNum = parseFloat(faturamento) || 0;
   const salarioNum = parseFloat(salarioFixo) || 0;
   const diasUteisNum = parseFloat(diasUteis) || 1;
   const domingosFeriadosNum = parseFloat(domingosFeriados) || 0;
+  const outrosDescontosNum = parseFloat(outrosDescontos) || 0;
 
   const atingimento = metaNum > 0 ? (fatNum / metaNum) * 100 : 0;
   const aliquota = atingimento < 85 ? 0.5 : atingimento < 100 ? 0.75 : 1.0;
@@ -57,7 +59,7 @@ const Index = () => {
 
   const inss = calcINSS(salarioBruto);
   const irrf = calcIRRF(salarioBruto, inss);
-  const salarioLiquido = salarioBruto - inss - irrf;
+  const salarioLiquido = salarioBruto - inss - irrf - outrosDescontosNum;
 
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
@@ -68,6 +70,7 @@ const Index = () => {
     setSalarioFixo("1993.00");
     setDiasUteis("26");
     setDomingosFeriados("5");
+    setOutrosDescontos("0");
   };
 
   return (
@@ -120,6 +123,13 @@ const Index = () => {
               <div className="space-y-2">
                 <Label htmlFor="domingos">Domingos/Feriados</Label>
                 <Input id="domingos" type="number" value={domingosFeriados} onChange={(e) => setDomingosFeriados(e.target.value)} />
+              </div>
+            </div>
+            <div className="mt-4 border-t border-dashed pt-4">
+              <div className="space-y-2 sm:max-w-xs">
+                <Label htmlFor="outrosDescontos">Outros Descontos (R$)</Label>
+                <Input id="outrosDescontos" type="number" placeholder="0,00" value={outrosDescontos} onChange={(e) => setOutrosDescontos(e.target.value)} className="border-muted-foreground/30 bg-muted/50" />
+                <p className="text-xs text-muted-foreground">Convênio, Vale Refeição, Faltas, etc.</p>
               </div>
             </div>
           </CardContent>
@@ -237,9 +247,18 @@ const Index = () => {
                     {irrf > 0 ? `− ${formatCurrency(irrf)}` : "Isento"}
                   </span>
                 </div>
+                {outrosDescontosNum > 0 && (
+                  <div className="flex items-center justify-between border-b pb-3">
+                    <div>
+                      <span className="text-muted-foreground">Outros Descontos</span>
+                      <p className="text-xs text-muted-foreground/70">Convênio, VR, Faltas, etc.</p>
+                    </div>
+                    <span className="font-medium text-muted-foreground">− {formatCurrency(outrosDescontosNum)}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between pt-1">
                   <span className="font-bold text-foreground">Total Descontos</span>
-                  <span className="font-bold text-destructive">− {formatCurrency(inss + irrf)}</span>
+                  <span className="font-bold text-destructive">− {formatCurrency(inss + irrf + outrosDescontosNum)}</span>
                 </div>
               </div>
             </CardContent>
@@ -263,6 +282,12 @@ const Index = () => {
                 <span>INSS: −{formatCurrency(inss)}</span>
                 <span className="hidden sm:inline">•</span>
                 <span>IRRF: {irrf > 0 ? `−${formatCurrency(irrf)}` : "Isento"}</span>
+                {outrosDescontosNum > 0 && (
+                  <>
+                    <span className="hidden sm:inline">•</span>
+                    <span>Outros: −{formatCurrency(outrosDescontosNum)}</span>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>
