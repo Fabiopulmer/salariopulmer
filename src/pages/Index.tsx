@@ -42,6 +42,7 @@ const Index = () => {
   const [salarioFixo, setSalarioFixo] = useState("1993.00");
   const [diasUteis, setDiasUteis] = useState("26");
   const [domingosFeriados, setDomingosFeriados] = useState("5");
+  const [outrosDescontos, setOutrosDescontos] = useState("0");
 
   const metaNum = parseFloat(meta) || 0;
   const fatNum = parseFloat(faturamento) || 0;
