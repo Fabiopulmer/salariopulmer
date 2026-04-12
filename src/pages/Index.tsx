@@ -54,35 +54,26 @@ const Index = () => {
             <CardTitle className="text-lg">Dados do Mês</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <div className="space-y-2">
                 <Label htmlFor="meta">Meta do Mês (R$)</Label>
-                <Input
-                  id="meta"
-                  type="number"
-                  placeholder="0,00"
-                  value={meta}
-                  onChange={(e) => setMeta(e.target.value)}
-                />
+                <Input id="meta" type="number" placeholder="0,00" value={meta} onChange={(e) => setMeta(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="faturamento">Faturamento Realizado (R$)</Label>
-                <Input
-                  id="faturamento"
-                  type="number"
-                  placeholder="0,00"
-                  value={faturamento}
-                  onChange={(e) => setFaturamento(e.target.value)}
-                />
+                <Input id="faturamento" type="number" placeholder="0,00" value={faturamento} onChange={(e) => setFaturamento(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="salario">Salário Fixo (R$)</Label>
-                <Input
-                  id="salario"
-                  type="number"
-                  value={salarioFixo}
-                  onChange={(e) => setSalarioFixo(e.target.value)}
-                />
+                <Input id="salario" type="number" value={salarioFixo} onChange={(e) => setSalarioFixo(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="diasUteis">Dias Úteis</Label>
+                <Input id="diasUteis" type="number" value={diasUteis} onChange={(e) => setDiasUteis(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="domingos">Domingos/Feriados</Label>
+                <Input id="domingos" type="number" value={domingosFeriados} onChange={(e) => setDomingosFeriados(e.target.value)} />
               </div>
             </div>
           </CardContent>
