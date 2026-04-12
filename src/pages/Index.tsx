@@ -247,9 +247,18 @@ const Index = () => {
                     {irrf > 0 ? `− ${formatCurrency(irrf)}` : "Isento"}
                   </span>
                 </div>
+                {outrosDescontosNum > 0 && (
+                  <div className="flex items-center justify-between border-b pb-3">
+                    <div>
+                      <span className="text-muted-foreground">Outros Descontos</span>
+                      <p className="text-xs text-muted-foreground/70">Convênio, VR, Faltas, etc.</p>
+                    </div>
+                    <span className="font-medium text-muted-foreground">− {formatCurrency(outrosDescontosNum)}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between pt-1">
                   <span className="font-bold text-foreground">Total Descontos</span>
-                  <span className="font-bold text-destructive">− {formatCurrency(inss + irrf)}</span>
+                  <span className="font-bold text-destructive">− {formatCurrency(inss + irrf + outrosDescontosNum)}</span>
                 </div>
               </div>
             </CardContent>
