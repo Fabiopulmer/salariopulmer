@@ -70,6 +70,7 @@ const Index = () => {
     setSalarioFixo("1993.00");
     setDiasUteis("26");
     setDomingosFeriados("5");
+    setOutrosDescontos("0");
   };
 
   return (
