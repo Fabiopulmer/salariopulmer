@@ -125,6 +125,13 @@ const Index = () => {
                 <Input id="domingos" type="number" value={domingosFeriados} onChange={(e) => setDomingosFeriados(e.target.value)} />
               </div>
             </div>
+            <div className="mt-4 border-t border-dashed pt-4">
+              <div className="space-y-2 sm:max-w-xs">
+                <Label htmlFor="outrosDescontos">Outros Descontos (R$)</Label>
+                <Input id="outrosDescontos" type="number" placeholder="0,00" value={outrosDescontos} onChange={(e) => setOutrosDescontos(e.target.value)} className="border-muted-foreground/30 bg-muted/50" />
+                <p className="text-xs text-muted-foreground">Convênio, Vale Refeição, Faltas, etc.</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
