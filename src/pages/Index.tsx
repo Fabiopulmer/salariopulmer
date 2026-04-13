@@ -42,6 +42,7 @@ const Index = () => {
   const [salarioFixo, setSalarioFixo] = useState("1993.00");
   const [diasUteis, setDiasUteis] = useState("26");
   const [domingosFeriados, setDomingosFeriados] = useState("5");
+  const [diasUteisRestantes, setDiasUteisRestantes] = useState("10");
   const [outrosDescontos, setOutrosDescontos] = useState("0");
 
   const metaNum = parseFloat(meta) || 0;
@@ -50,6 +51,7 @@ const Index = () => {
   const diasUteisNum = parseFloat(diasUteis) || 1;
   const domingosFeriadosNum = parseFloat(domingosFeriados) || 0;
   const outrosDescontosNum = parseFloat(outrosDescontos) || 0;
+  const diasUteisRestantesNum = parseFloat(diasUteisRestantes) || 1;
 
   const atingimento = metaNum > 0 ? (fatNum / metaNum) * 100 : 0;
   const aliquota = atingimento < 85 ? 0.5 : atingimento < 100 ? 0.75 : 1.0;
@@ -64,12 +66,17 @@ const Index = () => {
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
 
+  const metaBatida = fatNum >= metaNum && metaNum > 0;
+  const valorRestante = metaNum - fatNum;
+  const metaDiaria = diasUteisRestantesNum > 0 ? valorRestante / diasUteisRestantesNum : 0;
+
   const handleLimpar = () => {
     setMeta("");
     setFaturamento("");
     setSalarioFixo("1993.00");
     setDiasUteis("26");
     setDomingosFeriados("5");
+    setDiasUteisRestantes("10");
     setOutrosDescontos("0");
   };
 
