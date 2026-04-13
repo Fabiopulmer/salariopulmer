@@ -204,7 +204,53 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Detalhamento Completo */}
+        {/* Ritmo de Vendas */}
+        <Card className="overflow-hidden border-2 border-highlight/30 shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Flame className="h-5 w-5 text-highlight" />
+              Ritmo de Vendas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {metaBatida ? (
+              <div className="flex flex-col items-center gap-3 rounded-lg bg-success/10 p-6 text-center">
+                <Rocket className="h-10 w-10 text-success" />
+                <p className="text-xl font-bold text-success">🚀 Meta Alcançada!</p>
+                <p className="text-sm text-muted-foreground">
+                  Tudo o que vier agora é bônus no comissionamento de 1%!
+                </p>
+                <p className="text-2xl font-extrabold text-success">
+                  +{formatCurrency(fatNum - metaNum)} acima da meta
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-3">
+                <div className="space-y-2">
+                  <Label htmlFor="diasRestantes">Dias Úteis Restantes</Label>
+                  <Input
+                    id="diasRestantes"
+                    type="number"
+                    value={diasUteisRestantes}
+                    onChange={(e) => setDiasUteisRestantes(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col items-center justify-center rounded-lg bg-muted/50 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Valor Restante</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">{formatCurrency(valorRestante > 0 ? valorRestante : 0)}</p>
+                </div>
+                <div className="flex flex-col items-center justify-center rounded-lg bg-highlight/10 p-4">
+                  <p className="text-xs font-medium text-highlight">Meta Diária Necessária</p>
+                  <p className="mt-1 text-3xl font-extrabold text-highlight">
+                    {formatCurrency(metaDiaria > 0 ? metaDiaria : 0)}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">por dia útil restante</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
