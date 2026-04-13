@@ -12,9 +12,9 @@ const formatCurrency = (value: number) =>
 const calcINSS = (bruto: number) => {
   const faixas = [
     { teto: 1518.00, aliquota: 0.075 },
-    { teto: 2793.88, aliquota: 0.09 },
-    { teto: 4190.83, aliquota: 0.12 },
-    { teto: 8157.41, aliquota: 0.14 },
+    { teto: 2793.00, aliquota: 0.09 },
+    { teto: 4190.00, aliquota: 0.12 },
+    { teto: 8157.00, aliquota: 0.14 },
   ];
   let desconto = 0;
   let anterior = 0;
@@ -27,13 +27,34 @@ const calcINSS = (bruto: number) => {
   return desconto;
 };
 
-// IRRF 2026: isenção até R$5000
+// IRRF 2026 com tabela tradicional + regra de isenção/transição
 const calcIRRF = (bruto: number, inss: number) => {
+  // Regra 1: isenção total se bruto <= 5000
+  if (bruto <= 5000) return 0;
+
   const baseCalculo = bruto - inss;
-  if (baseCalculo <= 5000) return 0;
-  // Alíquota mínima de 7,5% sobre o excedente
-  const excedente = baseCalculo - 5000;
-  return excedente * 0.075;
+
+  // Tabela progressiva IRRF 2026
+  let irBruto = 0;
+  if (baseCalculo <= 2428.80) {
+    irBruto = 0;
+  } else if (baseCalculo <= 3100.00) {
+    irBruto = baseCalculo * 0.075 - 182.16;
+  } else if (baseCalculo <= 4100.00) {
+    irBruto = baseCalculo * 0.15 - 414.66;
+  } else if (baseCalculo <= 5100.00) {
+    irBruto = baseCalculo * 0.225 - 722.16;
+  } else {
+    irBruto = baseCalculo * 0.275 - 908.73;
+  }
+
+  // Regra de transição: bruto entre 5000.01 e 7350
+  if (bruto > 5000 && bruto <= 7350) {
+    const redutor = 978.62 - (0.133145 * bruto);
+    irBruto = irBruto - redutor;
+  }
+
+  return Math.max(irBruto, 0);
 };
 
 const Index = () => {
@@ -285,7 +306,7 @@ const Index = () => {
                 <div className="flex items-center justify-between border-b pb-3">
                   <div>
                     <span className="text-muted-foreground">INSS (Progressivo)</span>
-                    <p className="text-xs text-muted-foreground/70">7,5% a 14% por faixa</p>
+                    <p className="text-xs text-muted-foreground/70">Faixas: 7,5% · 9% · 12% · 14% (teto R$ 8.157)</p>
                   </div>
                   <span className="font-medium text-destructive">− {formatCurrency(inss)}</span>
                 </div>
@@ -293,7 +314,11 @@ const Index = () => {
                   <div>
                     <span className="text-muted-foreground">IRRF</span>
                     <p className="text-xs text-muted-foreground/70">
-                      {salarioBruto - inss <= 5000 ? "Isento (base ≤ R$ 5.000)" : "7,5% sobre excedente de R$ 5.000"}
+                      {salarioBruto <= 5000
+                        ? "Isento (bruto ≤ R$ 5.000)"
+                        : salarioBruto <= 7350
+                        ? "Tabela progressiva c/ redutor de transição"
+                        : "Tabela progressiva (sem redutor)"}
                     </p>
                   </div>
                   <span className={`font-medium ${irrf > 0 ? "text-destructive" : "text-success"}`}>
