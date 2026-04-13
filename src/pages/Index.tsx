@@ -306,7 +306,7 @@ const Index = () => {
                 <div className="flex items-center justify-between border-b pb-3">
                   <div>
                     <span className="text-muted-foreground">INSS (Progressivo)</span>
-                    <p className="text-xs text-muted-foreground/70">7,5% a 14% por faixa</p>
+                    <p className="text-xs text-muted-foreground/70">Faixas: 7,5% · 9% · 12% · 14% (teto R$ 8.157)</p>
                   </div>
                   <span className="font-medium text-destructive">− {formatCurrency(inss)}</span>
                 </div>
@@ -314,7 +314,11 @@ const Index = () => {
                   <div>
                     <span className="text-muted-foreground">IRRF</span>
                     <p className="text-xs text-muted-foreground/70">
-                      {salarioBruto - inss <= 5000 ? "Isento (base ≤ R$ 5.000)" : "7,5% sobre excedente de R$ 5.000"}
+                      {salarioBruto <= 5000
+                        ? "Isento (bruto ≤ R$ 5.000)"
+                        : salarioBruto <= 7350
+                        ? "Tabela progressiva c/ redutor de transição"
+                        : "Tabela progressiva (sem redutor)"}
                     </p>
                   </div>
                   <span className={`font-medium ${irrf > 0 ? "text-destructive" : "text-success"}`}>
