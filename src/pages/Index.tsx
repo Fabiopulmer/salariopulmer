@@ -94,7 +94,7 @@ const Index = () => {
   const handleLimpar = () => {
     setMeta("");
     setFaturamento("");
-    setSalarioFixo("1993.00");
+    setSalarioFixo("2157.00");
     setDiasUteis("26");
     setDomingosFeriados("5");
     setDiasUteisRestantes("10");
