@@ -60,7 +60,7 @@ const calcIRRF = (bruto: number, inss: number) => {
 const Index = () => {
   const [meta, setMeta] = useState("");
   const [faturamento, setFaturamento] = useState("");
-  const [salarioFixo, setSalarioFixo] = useState("1993.00");
+  const [salarioFixo, setSalarioFixo] = useState("2157.00");
   const [diasUteis, setDiasUteis] = useState("26");
   const [domingosFeriados, setDomingosFeriados] = useState("5");
   const [diasUteisRestantes, setDiasUteisRestantes] = useState("10");
