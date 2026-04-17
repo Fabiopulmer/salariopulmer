@@ -186,10 +186,16 @@ const Index = () => {
               Calcule comissões e salário total dos vendedores
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleLimpar} className="gap-2">
-            <RotateCcw className="h-4 w-4" />
-            Limpar
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleLimpar} className="gap-2">
+              <RotateCcw className="h-4 w-4" />
+              Limpar
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
+          </div>
         </div>
 
         {/* Inputs */}
@@ -199,6 +205,10 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="space-y-2">
+                <Label htmlFor="mesRef">Mês de Referência</Label>
+                <Input id="mesRef" type="text" placeholder="03/2026" value={mesReferencia} onChange={(e) => setMesReferencia(e.target.value)} />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="meta">Meta do Mês (R$)</Label>
                 <Input id="meta" type="number" placeholder="0,00" value={meta} onChange={(e) => setMeta(e.target.value)} />
