@@ -448,6 +448,22 @@ const Index = () => {
           </CardContent>
         </Card>
 
+        {/* Salvar Mês */}
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center gap-3 py-6 sm:flex-row sm:justify-between">
+            <div className="text-center sm:text-left">
+              <p className="font-semibold text-foreground">Salvar este mês no histórico</p>
+              <p className="text-xs text-muted-foreground">
+                Salva mês de referência, faturamento, meta, comissão e salário líquido na sua conta.
+              </p>
+            </div>
+            <Button onClick={handleSalvarMes} disabled={saving} className="gap-2">
+              <Save className="h-4 w-4" />
+              {saving ? "Salvando..." : "Salvar Mês"}
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Tabela de Comissões */}
         <Card>
           <CardHeader>
