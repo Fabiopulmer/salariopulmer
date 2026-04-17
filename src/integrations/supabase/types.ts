@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      vendas_historico: {
+        Row: {
+          comissao_valor: number
+          created_at: string
+          dsr: number
+          faturamento_total: number
+          id: string
+          inss: number
+          irrf: number
+          mes_referencia: string
+          meta_mes: number
+          salario_bruto: number
+          salario_liquido: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comissao_valor?: number
+          created_at?: string
+          dsr?: number
+          faturamento_total?: number
+          id?: string
+          inss?: number
+          irrf?: number
+          mes_referencia: string
+          meta_mes?: number
+          salario_bruto?: number
+          salario_liquido?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comissao_valor?: number
+          created_at?: string
+          dsr?: number
+          faturamento_total?: number
+          id?: string
+          inss?: number
+          irrf?: number
+          mes_referencia?: string
+          meta_mes?: number
+          salario_bruto?: number
+          salario_liquido?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
