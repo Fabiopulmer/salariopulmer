@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays, RotateCcw, BadgeCheck, Minus, Rocket, Flame } from "lucide-react";
+import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays, RotateCcw, BadgeCheck, Minus, Rocket, Flame, Save, LogOut } from "lucide-react";
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -58,6 +61,12 @@ const calcIRRF = (bruto: number, inss: number) => {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [mesReferencia, setMesReferencia] = useState("");
   const [meta, setMeta] = useState("");
   const [faturamento, setFaturamento] = useState("");
   const [salarioFixo, setSalarioFixo] = useState("2157.00");
@@ -65,6 +74,20 @@ const Index = () => {
   const [domingosFeriados, setDomingosFeriados] = useState("5");
   const [diasUteisRestantes, setDiasUteisRestantes] = useState("10");
   const [outrosDescontos, setOutrosDescontos] = useState("0");
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user.id ?? null);
+      setAuthChecked(true);
+      if (!session) navigate("/auth", { replace: true });
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user.id ?? null);
+      setAuthChecked(true);
+      if (!session) navigate("/auth", { replace: true });
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const metaNum = parseFloat(meta) || 0;
   const fatNum = parseFloat(faturamento) || 0;
@@ -92,6 +115,7 @@ const Index = () => {
   const metaDiaria = diasUteisRestantesNum > 0 ? valorRestante / diasUteisRestantesNum : 0;
 
   const handleLimpar = () => {
+    setMesReferencia("");
     setMeta("");
     setFaturamento("");
     setSalarioFixo("2157.00");
@@ -100,6 +124,49 @@ const Index = () => {
     setDiasUteisRestantes("10");
     setOutrosDescontos("0");
   };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth", { replace: true });
+  };
+
+  const handleSalvarMes = async () => {
+    if (!userId) {
+      toast.error("Você precisa estar logado para salvar.");
+      return;
+    }
+    if (!mesReferencia.trim()) {
+      toast.error("Informe o mês de referência (ex: 03/2026).");
+      return;
+    }
+    if (metaNum <= 0 || fatNum <= 0) {
+      toast.error("Preencha meta e faturamento antes de salvar.");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.from("vendas_historico").insert({
+      user_id: userId,
+      mes_referencia: mesReferencia.trim(),
+      faturamento_total: fatNum,
+      meta_mes: metaNum,
+      comissao_valor: comissao,
+      salario_liquido: salarioLiquido,
+      salario_bruto: salarioBruto,
+      inss,
+      irrf,
+      dsr,
+    });
+    setSaving(false);
+    if (error) {
+      toast.error("Erro ao salvar: " + error.message);
+    } else {
+      toast.success(`Mês ${mesReferencia} salvo com sucesso!`);
+    }
+  };
+
+  if (!authChecked) {
+    return <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">Carregando...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
