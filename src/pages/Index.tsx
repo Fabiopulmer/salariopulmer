@@ -134,6 +134,8 @@ const Index = () => {
   const domingosFeriadosNum = parseFloat(domingosFeriados) || 0;
   const outrosDescontosNum = parseFloat(outrosDescontos) || 0;
   const diasUteisRestantesNum = parseFloat(diasUteisRestantes) || 1;
+  const qtdClientesNum = parseInt(qtdClientes) || 0;
+  const ticketMedio = qtdClientesNum > 0 ? fatNum / qtdClientesNum : 0;
 
   const atingimento = metaNum > 0 ? (fatNum / metaNum) * 100 : 0;
   const aliquota = atingimento < 85 ? 0.5 : atingimento < 100 ? 0.75 : 1.0;
