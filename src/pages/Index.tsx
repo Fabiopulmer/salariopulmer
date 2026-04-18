@@ -74,6 +74,7 @@ const Index = () => {
   const [domingosFeriados, setDomingosFeriados] = useState("5");
   const [diasUteisRestantes, setDiasUteisRestantes] = useState("10");
   const [outrosDescontos, setOutrosDescontos] = useState("0");
+  const [qtdClientes, setQtdClientes] = useState("0");
 
   const loadUserData = async (uid: string) => {
     // 1) Configurações pessoais (salário fixo, outros descontos padrão)
