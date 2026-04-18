@@ -163,6 +163,7 @@ const Index = () => {
     setDomingosFeriados("5");
     setDiasUteisRestantes("10");
     setOutrosDescontos("0");
+    setQtdClientes("0");
   };
 
   const handleLogout = async () => {
