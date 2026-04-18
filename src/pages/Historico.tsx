@@ -25,7 +25,18 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { ArrowLeft, Download, History, Target } from "lucide-react";
+import { ArrowLeft, Download, History, Target, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Registro = {
   id: string;
