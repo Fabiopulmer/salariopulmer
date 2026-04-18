@@ -192,6 +192,15 @@ const Index = () => {
       irrf,
       dsr,
     });
+    // Persiste as configurações pessoais para reuso no próximo login
+    await supabase.from("user_configuracoes").upsert(
+      {
+        user_id: userId,
+        salario_fixo: salarioNum,
+        outros_descontos: outrosDescontosNum,
+      },
+      { onConflict: "user_id" }
+    );
     setSaving(false);
     if (error) {
       toast.error("Erro ao salvar: " + error.message);
