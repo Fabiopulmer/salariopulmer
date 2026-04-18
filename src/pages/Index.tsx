@@ -185,19 +185,23 @@ const Index = () => {
       return;
     }
     setSaving(true);
-    const { error } = await supabase.from("vendas_historico").insert({
-      user_id: userId,
-      mes_referencia: mesReferencia.trim(),
-      faturamento_total: fatNum,
-      meta_mes: metaNum,
-      comissao_valor: comissao,
-      salario_liquido: salarioLiquido,
-      salario_bruto: salarioBruto,
-      inss,
-      irrf,
-      dsr,
-      qtd_clientes: qtdClientesNum,
-    });
+    const mesKey = mesReferencia.trim();
+    const { error } = await supabase.from("vendas_historico").upsert(
+      {
+        user_id: userId,
+        mes_referencia: mesKey,
+        faturamento_total: fatNum,
+        meta_mes: metaNum,
+        comissao_valor: comissao,
+        salario_liquido: salarioLiquido,
+        salario_bruto: salarioBruto,
+        inss,
+        irrf,
+        dsr,
+        qtd_clientes: qtdClientesNum,
+      },
+      { onConflict: "user_id,mes_referencia" }
+    );
     // Persiste as configurações pessoais para reuso no próximo login
     await supabase.from("user_configuracoes").upsert(
       {
