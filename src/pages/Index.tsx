@@ -273,6 +273,22 @@ const Index = () => {
                 <Input id="faturamento" type="number" placeholder="0,00" value={faturamento} onChange={(e) => setFaturamento(e.target.value)} />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="qtdClientes">Qtd. de Clientes com Compra</Label>
+                <Input
+                  id="qtdClientes"
+                  type="number"
+                  inputMode="numeric"
+                  step="1"
+                  min="0"
+                  placeholder="0"
+                  value={qtdClientes}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/[^\d]/g, "");
+                    setQtdClientes(v);
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="salario">Salário Fixo (R$)</Label>
                 <Input id="salario" type="number" value={salarioFixo} onChange={(e) => setSalarioFixo(e.target.value)} />
               </div>
