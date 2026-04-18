@@ -74,6 +74,7 @@ const Index = () => {
   const [domingosFeriados, setDomingosFeriados] = useState("5");
   const [diasUteisRestantes, setDiasUteisRestantes] = useState("10");
   const [outrosDescontos, setOutrosDescontos] = useState("0");
+  const [qtdClientes, setQtdClientes] = useState("0");
 
   const loadUserData = async (uid: string) => {
     // 1) Configurações pessoais (salário fixo, outros descontos padrão)
@@ -98,6 +99,7 @@ const Index = () => {
       setMesReferencia(ultimo.mes_referencia ?? "");
       setMeta(String(ultimo.meta_mes ?? ""));
       setFaturamento(String(ultimo.faturamento_total ?? ""));
+      setQtdClientes(String((ultimo as any).qtd_clientes ?? 0));
     }
   };
 
@@ -132,6 +134,8 @@ const Index = () => {
   const domingosFeriadosNum = parseFloat(domingosFeriados) || 0;
   const outrosDescontosNum = parseFloat(outrosDescontos) || 0;
   const diasUteisRestantesNum = parseFloat(diasUteisRestantes) || 1;
+  const qtdClientesNum = parseInt(qtdClientes) || 0;
+  const ticketMedio = qtdClientesNum > 0 ? fatNum / qtdClientesNum : 0;
 
   const atingimento = metaNum > 0 ? (fatNum / metaNum) * 100 : 0;
   const aliquota = atingimento < 85 ? 0.5 : atingimento < 100 ? 0.75 : 1.0;
@@ -159,6 +163,7 @@ const Index = () => {
     setDomingosFeriados("5");
     setDiasUteisRestantes("10");
     setOutrosDescontos("0");
+    setQtdClientes("0");
   };
 
   const handleLogout = async () => {
@@ -191,6 +196,7 @@ const Index = () => {
       inss,
       irrf,
       dsr,
+      qtd_clientes: qtdClientesNum,
     });
     // Persiste as configurações pessoais para reuso no próximo login
     await supabase.from("user_configuracoes").upsert(
@@ -265,6 +271,22 @@ const Index = () => {
               <div className="space-y-2">
                 <Label htmlFor="faturamento">Faturamento Realizado (R$)</Label>
                 <Input id="faturamento" type="number" placeholder="0,00" value={faturamento} onChange={(e) => setFaturamento(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="qtdClientes">Qtd. de Clientes com Compra</Label>
+                <Input
+                  id="qtdClientes"
+                  type="number"
+                  inputMode="numeric"
+                  step="1"
+                  min="0"
+                  placeholder="0"
+                  value={qtdClientes}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/[^\d]/g, "");
+                    setQtdClientes(v);
+                  }}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="salario">Salário Fixo (R$)</Label>
@@ -347,6 +369,19 @@ const Index = () => {
               </div>
               <p className="mt-2 text-3xl font-bold text-primary-foreground">{formatCurrency(salarioBruto)}</p>
               <p className="mt-1 text-xs text-primary-foreground/70">Fixo + Comissão + DSR</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-muted-foreground">Ticket Médio por Cliente</p>
+                <BadgeCheck className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="mt-2 text-3xl font-bold text-foreground">{formatCurrency(ticketMedio)}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {qtdClientesNum > 0 ? `${formatCurrency(fatNum)} / ${qtdClientesNum} clientes` : "Informe a quantidade de clientes"}
+              </p>
             </CardContent>
           </Card>
         </div>

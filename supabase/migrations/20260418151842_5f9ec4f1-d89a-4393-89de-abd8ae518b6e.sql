@@ -1,0 +1,1 @@
+ALTER TABLE public.vendas_historico ADD COLUMN qtd_clientes integer NOT NULL DEFAULT 0;
