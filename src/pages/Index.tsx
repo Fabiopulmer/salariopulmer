@@ -75,16 +75,52 @@ const Index = () => {
   const [diasUteisRestantes, setDiasUteisRestantes] = useState("10");
   const [outrosDescontos, setOutrosDescontos] = useState("0");
 
+  const loadUserData = async (uid: string) => {
+    // 1) Configurações pessoais (salário fixo, outros descontos padrão)
+    const { data: cfg } = await supabase
+      .from("user_configuracoes")
+      .select("salario_fixo, outros_descontos")
+      .eq("user_id", uid)
+      .maybeSingle();
+    if (cfg) {
+      if (cfg.salario_fixo) setSalarioFixo(String(cfg.salario_fixo));
+      if (cfg.outros_descontos) setOutrosDescontos(String(cfg.outros_descontos));
+    }
+    // 2) Último mês salvo
+    const { data: ultimo } = await supabase
+      .from("vendas_historico")
+      .select("*")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (ultimo) {
+      setMesReferencia(ultimo.mes_referencia ?? "");
+      setMeta(String(ultimo.meta_mes ?? ""));
+      setFaturamento(String(ultimo.faturamento_total ?? ""));
+    }
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUserId(session?.user.id ?? null);
+      const uid = session?.user.id ?? null;
+      setUserId(uid);
       setAuthChecked(true);
-      if (!session) navigate("/auth", { replace: true });
+      if (!session) {
+        navigate("/auth", { replace: true });
+      } else if (uid) {
+        setTimeout(() => loadUserData(uid), 0);
+      }
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUserId(session?.user.id ?? null);
+      const uid = session?.user.id ?? null;
+      setUserId(uid);
       setAuthChecked(true);
-      if (!session) navigate("/auth", { replace: true });
+      if (!session) {
+        navigate("/auth", { replace: true });
+      } else if (uid) {
+        loadUserData(uid);
+      }
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
