@@ -25,7 +25,18 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { ArrowLeft, Download, History, Target } from "lucide-react";
+import { ArrowLeft, Download, History, Target, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Registro = {
   id: string;
@@ -118,6 +129,24 @@ const Historico = () => {
     toast.success("Histórico exportado!");
   };
 
+  const handleLimparTudo = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth", { replace: true });
+      return;
+    }
+    const { error } = await supabase
+      .from("vendas_historico")
+      .delete()
+      .eq("user_id", session.user.id);
+    if (error) {
+      toast.error("Erro ao apagar: " + error.message);
+      return;
+    }
+    setRegistros([]);
+    toast.success("Histórico apagado com sucesso!");
+  };
+
   if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">
@@ -144,7 +173,7 @@ const Historico = () => {
               Sua evolução mês a mês — apenas seus dados
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-2">
               <ArrowLeft className="h-4 w-4" />
               Voltar
@@ -153,6 +182,31 @@ const Historico = () => {
               <Download className="h-4 w-4" />
               Exportar Histórico
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="gap-2" disabled={registros.length === 0}>
+                  <Trash2 className="h-4 w-4" />
+                  Limpar Histórico Completo
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Deseja apagar permanentemente todos os registros salvos?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação não pode ser desfeita. Todos os {registros.length} meses do seu histórico serão apagados do banco de dados.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleLimparTudo}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Sim, apagar tudo
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
 
