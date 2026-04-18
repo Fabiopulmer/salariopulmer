@@ -371,6 +371,19 @@ const Index = () => {
               <p className="mt-1 text-xs text-primary-foreground/70">Fixo + Comissão + DSR</p>
             </CardContent>
           </Card>
+
+          <Card className="border-none shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-muted-foreground">Ticket Médio por Cliente</p>
+                <BadgeCheck className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="mt-2 text-3xl font-bold text-foreground">{formatCurrency(ticketMedio)}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {qtdClientesNum > 0 ? `${formatCurrency(fatNum)} / ${qtdClientesNum} clientes` : "Informe a quantidade de clientes"}
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Ritmo de Vendas */}
