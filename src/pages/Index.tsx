@@ -99,6 +99,7 @@ const Index = () => {
       setMesReferencia(ultimo.mes_referencia ?? "");
       setMeta(String(ultimo.meta_mes ?? ""));
       setFaturamento(String(ultimo.faturamento_total ?? ""));
+      setQtdClientes(String((ultimo as any).qtd_clientes ?? 0));
     }
   };
 
