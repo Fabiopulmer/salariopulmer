@@ -196,6 +196,7 @@ const Index = () => {
       inss,
       irrf,
       dsr,
+      qtd_clientes: qtdClientesNum,
     });
     // Persiste as configurações pessoais para reuso no próximo login
     await supabase.from("user_configuracoes").upsert(
