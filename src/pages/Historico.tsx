@@ -25,7 +25,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { ArrowLeft, Download, History, Target, Trash2 } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Download, History, Target, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,6 +45,7 @@ type Registro = {
   meta_mes: number;
   comissao_valor: number;
   salario_liquido: number;
+  qtd_clientes: number;
   created_at: string;
 };
 
@@ -67,7 +68,7 @@ const Historico = () => {
       setAuthChecked(true);
       const { data, error } = await supabase
         .from("vendas_historico")
-        .select("id, mes_referencia, faturamento_total, meta_mes, comissao_valor, salario_liquido, created_at")
+        .select("id, mes_referencia, faturamento_total, meta_mes, comissao_valor, salario_liquido, qtd_clientes, created_at")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: true });
       if (error) {
@@ -90,6 +91,17 @@ const Historico = () => {
     return { metasBatidas: bat, metasNaoBatidas: nao };
   }, [registros]);
 
+  const ticketMedioGeral = useMemo(() => {
+    const tickets = registros
+      .map((r) => {
+        const qtd = Number(r.qtd_clientes) || 0;
+        return qtd > 0 ? Number(r.faturamento_total) / qtd : 0;
+      })
+      .filter((t) => t > 0);
+    if (!tickets.length) return 0;
+    return tickets.reduce((a, b) => a + b, 0) / tickets.length;
+  }, [registros]);
+
   const chartData = registros.map((r) => ({
     mes: r.mes_referencia,
     liquido: Number(r.salario_liquido) || 0,
@@ -106,9 +118,11 @@ const Historico = () => {
       toast.error("Nenhum registro para exportar.");
       return;
     }
-    const header = ["Mes/Ano", "Faturamento", "Meta", "% da Meta", "Comissao", "Salario Liquido"];
+    const header = ["Mes/Ano", "Faturamento", "Meta", "% da Meta", "Comissao", "Salario Liquido", "Qtd Clientes", "Ticket Medio"];
     const rows = registros.map((r) => {
       const pct = r.meta_mes > 0 ? ((r.faturamento_total / r.meta_mes) * 100).toFixed(1) : "0";
+      const qtd = Number(r.qtd_clientes) || 0;
+      const ticket = qtd > 0 ? r.faturamento_total / qtd : 0;
       return [
         r.mes_referencia,
         r.faturamento_total.toFixed(2),
@@ -116,6 +130,8 @@ const Historico = () => {
         pct,
         r.comissao_valor.toFixed(2),
         r.salario_liquido.toFixed(2),
+        String(qtd),
+        ticket.toFixed(2),
       ].join(";");
     });
     const csv = [header.join(";"), ...rows].join("\n");
@@ -225,7 +241,7 @@ const Historico = () => {
         ) : (
           <>
             {/* Indicadores */}
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="border-none shadow-md">
                 <CardContent className="pt-6">
                   <p className="text-sm font-medium text-muted-foreground">Meses registrados</p>
@@ -249,6 +265,16 @@ const Historico = () => {
                   </p>
                 </CardContent>
               </Card>
+              <Card className="border-none bg-primary shadow-md">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-primary-foreground/80">Ticket Médio Geral</p>
+                    <BadgeCheck className="h-4 w-4 text-primary-foreground/80" />
+                  </div>
+                  <p className="mt-2 text-3xl font-bold text-primary-foreground">{formatCurrency(ticketMedioGeral)}</p>
+                  <p className="mt-1 text-xs text-primary-foreground/70">Média de todos os meses</p>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Tabela */}
@@ -264,6 +290,7 @@ const Historico = () => {
                       <TableHead className="text-right">Faturamento</TableHead>
                       <TableHead className="text-right">% da Meta</TableHead>
                       <TableHead className="text-right">Comissão</TableHead>
+                      <TableHead className="text-right">Ticket Médio</TableHead>
                       <TableHead className="text-right">Salário Líquido</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -271,6 +298,8 @@ const Historico = () => {
                     {registros.map((r) => {
                       const pct = r.meta_mes > 0 ? (r.faturamento_total / r.meta_mes) * 100 : 0;
                       const batida = pct >= 100;
+                      const qtd = Number(r.qtd_clientes) || 0;
+                      const ticket = qtd > 0 ? r.faturamento_total / qtd : 0;
                       return (
                         <TableRow key={r.id}>
                           <TableCell className="font-medium">{r.mes_referencia}</TableCell>
@@ -279,6 +308,7 @@ const Historico = () => {
                             {pct.toFixed(1)}%
                           </TableCell>
                           <TableCell className="text-right">{formatCurrency(r.comissao_valor)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(ticket)}</TableCell>
                           <TableCell className="text-right font-semibold">{formatCurrency(r.salario_liquido)}</TableCell>
                         </TableRow>
                       );
