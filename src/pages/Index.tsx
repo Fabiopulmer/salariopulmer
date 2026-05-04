@@ -60,6 +60,61 @@ const calcIRRF = (bruto: number, inss: number) => {
   return Math.max(irBruto, 0);
 };
 
+// Calcula dias úteis (seg-sáb) e domingos+feriados nacionais para um mês MM/AAAA
+const parseMesAnoStr = (mesAno: string): { mes: number; ano: number } | null => {
+  const m = mesAno.trim().match(/^(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  const mes = parseInt(m[1], 10);
+  const ano = parseInt(m[2], 10);
+  if (mes < 1 || mes > 12) return null;
+  return { mes, ano };
+};
+
+const calcularDiasMes = async (mesAno: string) => {
+  const parsed = parseMesAnoStr(mesAno);
+  if (!parsed) return null;
+  const { mes, ano } = parsed;
+
+  // Buscar feriados nacionais via BrasilAPI
+  let feriadosDoMes: Set<string> = new Set();
+  try {
+    const resp = await fetch(`https://brasilapi.com.br/api/feriados/v1/${ano}`);
+    if (resp.ok) {
+      const feriados: { date: string }[] = await resp.json();
+      feriadosDoMes = new Set(
+        feriados
+          .filter((f) => {
+            const [, fm] = f.date.split("-");
+            return parseInt(fm, 10) === mes;
+          })
+          .map((f) => f.date)
+      );
+    }
+  } catch {
+    // Se a API falhar, segue sem feriados
+  }
+
+  const diasNoMes = new Date(ano, mes, 0).getDate();
+  let diasUteis = 0;
+  let domingosFeriados = 0;
+
+  for (let dia = 1; dia <= diasNoMes; dia++) {
+    const data = new Date(ano, mes - 1, dia);
+    const dow = data.getDay(); // 0 = domingo
+    const iso = `${ano}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+    const ehFeriado = feriadosDoMes.has(iso);
+
+    if (dow === 0 || ehFeriado) {
+      domingosFeriados++;
+    } else {
+      // Segunda a sábado e não-feriado = dia útil
+      diasUteis++;
+    }
+  }
+
+  return { diasUteis, domingosFeriados };
+};
+
 const Index = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
@@ -170,6 +225,23 @@ const Index = () => {
     await supabase.auth.signOut();
     navigate("/auth", { replace: true });
   };
+
+  // Recalcula dias úteis e domingos/feriados quando o Mês de Referência muda
+  useEffect(() => {
+    const parsed = parseMesAnoStr(mesReferencia);
+    if (!parsed) return;
+    let cancelled = false;
+    (async () => {
+      const result = await calcularDiasMes(mesReferencia);
+      if (!cancelled && result) {
+        setDiasUteis(String(result.diasUteis));
+        setDomingosFeriados(String(result.domingosFeriados));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [mesReferencia]);
 
   const handleSalvarMes = async () => {
     if (!userId) {
