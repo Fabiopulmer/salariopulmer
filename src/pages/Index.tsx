@@ -121,7 +121,12 @@ const Index = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const [mesReferencia, setMesReferencia] = useState("");
+  const [mesReferencia, setMesReferencia] = useState(() => {
+    const hoje = new Date();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const ano = hoje.getFullYear();
+    return `${mes}/${ano}`;
+  });
   const [meta, setMeta] = useState("");
   const [faturamento, setFaturamento] = useState("");
   const [salarioFixo, setSalarioFixo] = useState("2157.00");
