@@ -81,6 +81,16 @@ const Historico = () => {
     init();
   }, [navigate]);
 
+  const registrosOrdenados = useMemo(() => {
+    const parseMesAno = (s: string): number => {
+      // espera formato MM/AAAA
+      const [mes, ano] = (s || "").split("/").map((p) => parseInt(p, 10));
+      if (!mes || !ano) return 0;
+      return ano * 100 + mes;
+    };
+    return [...registros].sort((a, b) => parseMesAno(b.mes_referencia) - parseMesAno(a.mes_referencia));
+  }, [registros]);
+
   const { metasBatidas, metasNaoBatidas } = useMemo(() => {
     let bat = 0;
     let nao = 0;
@@ -102,7 +112,7 @@ const Historico = () => {
     return tickets.reduce((a, b) => a + b, 0) / tickets.length;
   }, [registros]);
 
-  const chartData = registros.map((r) => ({
+  const chartData = [...registrosOrdenados].reverse().map((r) => ({
     mes: r.mes_referencia,
     liquido: Number(r.salario_liquido) || 0,
   }));
@@ -315,7 +325,7 @@ const Historico = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {registros.map((r) => {
+                    {registrosOrdenados.map((r) => {
                       const pct = r.meta_mes > 0 ? (r.faturamento_total / r.meta_mes) * 100 : 0;
                       const batida = pct >= 100;
                       const qtd = Number(r.qtd_clientes) || 0;
