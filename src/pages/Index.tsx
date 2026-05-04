@@ -147,20 +147,9 @@ const Index = () => {
       if (cfg.salario_fixo) setSalarioFixo(String(cfg.salario_fixo));
       if (cfg.outros_descontos) setOutrosDescontos(String(cfg.outros_descontos));
     }
-    // 2) Último mês salvo
-    const { data: ultimo } = await supabase
-      .from("vendas_historico")
-      .select("*")
-      .eq("user_id", uid)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (ultimo) {
-      setMesReferencia(ultimo.mes_referencia ?? "");
-      setMeta(String(ultimo.meta_mes ?? ""));
-      setFaturamento(String(ultimo.faturamento_total ?? ""));
-      setQtdClientes(String((ultimo as any).qtd_clientes ?? 0));
-    }
+    // 2) Sempre iniciar com o mês atual e campos zerados — não carregar último registro
+    setFaturamento("");
+    setQtdClientes("0");
   };
 
   useEffect(() => {
