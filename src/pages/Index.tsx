@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays, RotateCcw, BadgeCheck, Rocket, Flame, Save, LogOut, History } from "lucide-react";
+import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays, RotateCcw, BadgeCheck, Minus, Rocket, Flame, Save, LogOut, History } from "lucide-react";
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -76,7 +76,7 @@ const Index = () => {
   const [outrosDescontos, setOutrosDescontos] = useState("0");
   const [qtdClientes, setQtdClientes] = useState("0");
 
-  const loadUserDataLegacy = async (uid: string) => {
+  const loadUserData = async (uid: string) => {
     // 1) Configurações pessoais (salário fixo, outros descontos padrão)
     const { data: cfg } = await supabase
       .from("user_configuracoes")
@@ -99,45 +99,7 @@ const Index = () => {
       setMesReferencia(ultimo.mes_referencia ?? "");
       setMeta(String(ultimo.meta_mes ?? ""));
       setFaturamento(String(ultimo.faturamento_total ?? ""));
-      setQtdClientes(String(ultimo.qtd_clientes ?? 0));
-    }
-  };
-
-  void loadUserDataLegacy;
-
-  const loadUserData = async (uid: string) => {
-    const [
-      { data: cfg, error: cfgError },
-      { data: ultimo, error: ultimoError },
-    ] = await Promise.all([
-      supabase
-        .from("user_configuracoes")
-        .select("salario_fixo, outros_descontos")
-        .eq("user_id", uid)
-        .maybeSingle(),
-      supabase
-        .from("vendas_historico")
-        .select("*")
-        .eq("user_id", uid)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
-
-    if (cfgError) {
-      toast.error("Erro ao carregar suas configurações: " + cfgError.message);
-    } else if (cfg) {
-      if (cfg.salario_fixo) setSalarioFixo(String(cfg.salario_fixo));
-      if (cfg.outros_descontos) setOutrosDescontos(String(cfg.outros_descontos));
-    }
-
-    if (ultimoError) {
-      toast.error("Erro ao carregar seu último mês salvo: " + ultimoError.message);
-    } else if (ultimo) {
-      setMesReferencia(ultimo.mes_referencia ?? "");
-      setMeta(String(ultimo.meta_mes ?? ""));
-      setFaturamento(String(ultimo.faturamento_total ?? ""));
-      setQtdClientes(String(ultimo.qtd_clientes ?? 0));
+      setQtdClientes(String((ultimo as any).qtd_clientes ?? 0));
     }
   };
 
@@ -224,7 +186,7 @@ const Index = () => {
     }
     setSaving(true);
     const mesKey = mesReferencia.trim();
-    const { error: historicoError } = await supabase.from("vendas_historico").upsert(
+    const { error } = await supabase.from("vendas_historico").upsert(
       {
         user_id: userId,
         mes_referencia: mesKey,
@@ -241,7 +203,7 @@ const Index = () => {
       { onConflict: "user_id,mes_referencia" }
     );
     // Persiste as configurações pessoais para reuso no próximo login
-    const { error: configError } = await supabase.from("user_configuracoes").upsert(
+    await supabase.from("user_configuracoes").upsert(
       {
         user_id: userId,
         salario_fixo: salarioNum,
@@ -250,9 +212,8 @@ const Index = () => {
       { onConflict: "user_id" }
     );
     setSaving(false);
-    if (historicoError || configError) {
-      const message = historicoError?.message ?? configError?.message ?? "Falha desconhecida";
-      toast.error("Erro ao salvar no Supabase: " + message);
+    if (error) {
+      toast.error("Erro ao salvar: " + error.message);
     } else {
       toast.success(`Mês ${mesReferencia} salvo com sucesso!`);
     }
