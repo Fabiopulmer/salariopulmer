@@ -25,7 +25,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { ArrowLeft, BadgeCheck, Download, History, Target, Trash2 } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Download, History, Target, Trash2, Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -163,6 +163,25 @@ const Historico = () => {
     toast.success("Histórico apagado com sucesso!");
   };
 
+  const handleExcluirMes = async (registro: Registro) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth", { replace: true });
+      return;
+    }
+    const { error } = await supabase
+      .from("vendas_historico")
+      .delete()
+      .eq("user_id", session.user.id)
+      .eq("id", registro.id);
+    if (error) {
+      toast.error("Erro ao excluir: " + error.message);
+      return;
+    }
+    setRegistros((prev) => prev.filter((r) => r.id !== registro.id));
+    toast.success(`Registro de ${registro.mes_referencia} excluído!`);
+  };
+
   if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">
@@ -292,6 +311,7 @@ const Historico = () => {
                       <TableHead className="text-right">Comissão</TableHead>
                       <TableHead className="text-right">Ticket Médio</TableHead>
                       <TableHead className="text-right">Salário Líquido</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -310,6 +330,39 @@ const Historico = () => {
                           <TableCell className="text-right">{formatCurrency(r.comissao_valor)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(ticket)}</TableCell>
                           <TableCell className="text-right font-semibold">{formatCurrency(r.salario_liquido)}</TableCell>
+                          <TableCell className="text-right">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                  aria-label={`Excluir ${r.mes_referencia}`}
+                                >
+                                  <Trash className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Tem certeza que deseja excluir os dados de {r.mes_referencia}?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Esta ação não pode ser desfeita. O registro será removido permanentemente do banco de dados.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleExcluirMes(r)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Sim, excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </TableCell>
                         </TableRow>
                       );
                     })}
