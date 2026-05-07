@@ -292,6 +292,10 @@ const Index = () => {
         setDiasUteis(String(result.diasUteis));
         setDomingosFeriados(String(result.domingosFeriados));
       }
+      const restantes = await calcularDiasUteisRestantes(mesReferencia);
+      if (!cancelled && restantes !== null) {
+        setDiasUteisRestantes(String(restantes));
+      }
     })();
     return () => {
       cancelled = true;
