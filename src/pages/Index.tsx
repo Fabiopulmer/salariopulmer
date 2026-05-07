@@ -147,9 +147,24 @@ const Index = () => {
       if (cfg.salario_fixo) setSalarioFixo(String(cfg.salario_fixo));
       if (cfg.outros_descontos) setOutrosDescontos(String(cfg.outros_descontos));
     }
-    // 2) Sempre iniciar com o mês atual e campos zerados — não carregar último registro
-    setFaturamento("");
-    setQtdClientes("0");
+    // 2) Buscar registro do mês vigente (mês atual) para permitir continuar editando
+    const hoje = new Date();
+    const mesAtual = `${String(hoje.getMonth() + 1).padStart(2, "0")}/${hoje.getFullYear()}`;
+    const { data: registroMes } = await supabase
+      .from("vendas_historico")
+      .select("mes_referencia, meta_mes, faturamento_total, qtd_clientes")
+      .eq("user_id", uid)
+      .eq("mes_referencia", mesAtual)
+      .maybeSingle();
+    if (registroMes) {
+      setMesReferencia(registroMes.mes_referencia);
+      setMeta(registroMes.meta_mes ? String(registroMes.meta_mes) : "");
+      setFaturamento(registroMes.faturamento_total ? String(registroMes.faturamento_total) : "");
+      setQtdClientes(String(registroMes.qtd_clientes ?? 0));
+    } else {
+      setFaturamento("");
+      setQtdClientes("0");
+    }
   };
 
   useEffect(() => {
