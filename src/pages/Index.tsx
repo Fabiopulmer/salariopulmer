@@ -115,6 +115,52 @@ const calcularDiasMes = async (mesAno: string) => {
   return { diasUteis, domingosFeriados };
 };
 
+// Calcula dias úteis restantes (seg-sex, excluindo feriados nacionais)
+// de hoje até o último dia do mês informado. Se o mês informado já passou,
+// retorna 0; se for futuro, retorna todos os dias úteis do mês.
+const calcularDiasUteisRestantes = async (mesAno: string) => {
+  const parsed = parseMesAnoStr(mesAno);
+  if (!parsed) return null;
+  const { mes, ano } = parsed;
+
+  let feriadosDoMes: Set<string> = new Set();
+  try {
+    const resp = await fetch(`https://brasilapi.com.br/api/feriados/v1/${ano}`);
+    if (resp.ok) {
+      const feriados: { date: string }[] = await resp.json();
+      feriadosDoMes = new Set(
+        feriados
+          .filter((f) => parseInt(f.date.split("-")[1], 10) === mes)
+          .map((f) => f.date)
+      );
+    }
+  } catch {
+    // segue sem feriados
+  }
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const diasNoMes = new Date(ano, mes, 0).getDate();
+
+  // Determina dia inicial: se o mês selecionado é o atual, começa hoje;
+  // se é futuro, começa no dia 1; se é passado, retorna 0.
+  const primeiroDoMes = new Date(ano, mes - 1, 1);
+  const ultimoDoMes = new Date(ano, mes - 1, diasNoMes);
+  if (hoje > ultimoDoMes) return 0;
+  const diaInicial = hoje < primeiroDoMes ? 1 : hoje.getDate();
+
+  let restantes = 0;
+  for (let dia = diaInicial; dia <= diasNoMes; dia++) {
+    const data = new Date(ano, mes - 1, dia);
+    const dow = data.getDay(); // 0=dom, 6=sab
+    const iso = `${ano}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+    if (dow === 0 || dow === 6) continue;
+    if (feriadosDoMes.has(iso)) continue;
+    restantes++;
+  }
+  return restantes;
+};
+
 const Index = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
@@ -245,6 +291,10 @@ const Index = () => {
       if (!cancelled && result) {
         setDiasUteis(String(result.diasUteis));
         setDomingosFeriados(String(result.domingosFeriados));
+      }
+      const restantes = await calcularDiasUteisRestantes(mesReferencia);
+      if (!cancelled && restantes !== null) {
+        setDiasUteisRestantes(String(restantes));
       }
     })();
     return () => {
