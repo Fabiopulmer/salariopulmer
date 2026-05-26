@@ -461,7 +461,7 @@ const Index = () => {
         </Card>
 
         {/* Result Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="border-none shadow-md">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -472,6 +472,25 @@ const Index = () => {
               <div className="mt-3 overflow-hidden rounded-full bg-secondary">
                 <div className={`h-2 rounded-full transition-all duration-500 ${progressColor}`} style={{ width: `${Math.min(atingimento, 100)}%` }} />
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md ring-1 ring-highlight/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-block h-2 w-2 rounded-full bg-highlight" />
+                  <p className="text-sm font-medium text-muted-foreground">Meta Pessoal</p>
+                </div>
+                <Target className="h-4 w-4 text-highlight" />
+              </div>
+              <p className="mt-2 text-3xl font-bold text-foreground">{atingimentoPessoal.toFixed(1)}%</p>
+              <div className="mt-3 overflow-hidden rounded-full bg-secondary">
+                <div className={`h-2 rounded-full transition-all duration-500 ${progressColorPessoal}`} style={{ width: `${Math.min(atingimentoPessoal, 100)}%` }} />
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {metaPessoalNum > 0 ? `${formatCurrency(fatNum)} de ${formatCurrency(metaPessoalNum)}` : "Defina sua meta pessoal"}
+              </p>
             </CardContent>
           </Card>
 
