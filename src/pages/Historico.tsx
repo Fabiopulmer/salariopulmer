@@ -319,6 +319,7 @@ const Historico = () => {
                       <TableHead className="text-right">Faturamento</TableHead>
                       <TableHead className="text-right">% da Meta</TableHead>
                       <TableHead className="text-right">Comissão</TableHead>
+                      <TableHead className="text-right">Clientes Positivados</TableHead>
                       <TableHead className="text-right">Ticket Médio</TableHead>
                       <TableHead className="text-right">Salário Líquido</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -338,6 +339,7 @@ const Historico = () => {
                             {pct.toFixed(1)}%
                           </TableCell>
                           <TableCell className="text-right">{formatCurrency(r.comissao_valor)}</TableCell>
+                          <TableCell className="text-right">{qtd}</TableCell>
                           <TableCell className="text-right">{formatCurrency(ticket)}</TableCell>
                           <TableCell className="text-right font-semibold">{formatCurrency(r.salario_liquido)}</TableCell>
                           <TableCell className="text-right">
