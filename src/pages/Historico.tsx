@@ -128,13 +128,14 @@ const Historico = () => {
       toast.error("Nenhum registro para exportar.");
       return;
     }
-    const header = ["Mes/Ano", "Faturamento", "Meta", "% da Meta", "Comissao", "Salario Liquido", "Qtd Clientes", "Ticket Medio"];
+    const header = ["Mes/Ano", "Meta do Mes", "Faturamento", "Meta", "% da Meta", "Comissao", "Salario Liquido", "Qtd Clientes", "Ticket Medio"];
     const rows = registros.map((r) => {
       const pct = r.meta_mes > 0 ? ((r.faturamento_total / r.meta_mes) * 100).toFixed(1) : "0";
       const qtd = Number(r.qtd_clientes) || 0;
       const ticket = qtd > 0 ? r.faturamento_total / qtd : 0;
       return [
         r.mes_referencia,
+        r.meta_mes.toFixed(2),
         r.faturamento_total.toFixed(2),
         r.meta_mes.toFixed(2),
         pct,
@@ -314,8 +315,9 @@ const Historico = () => {
               <CardContent>
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                  <TableRow>
                       <TableHead>Mês/Ano</TableHead>
+                      <TableHead className="text-right">Meta do Mês</TableHead>
                       <TableHead className="text-right">Faturamento</TableHead>
                       <TableHead className="text-right">% da Meta</TableHead>
                       <TableHead className="text-right">Comissão</TableHead>
@@ -334,6 +336,7 @@ const Historico = () => {
                       return (
                         <TableRow key={r.id}>
                           <TableCell className="font-medium">{r.mes_referencia}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(r.meta_mes)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(r.faturamento_total)}</TableCell>
                           <TableCell className={`text-right font-medium ${batida ? "text-success" : "text-muted-foreground"}`}>
                             {pct.toFixed(1)}%
