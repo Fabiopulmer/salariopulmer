@@ -239,6 +239,7 @@ const Index = () => {
   }, [navigate]);
 
   const metaNum = parseFloat(meta) || 0;
+  const metaPessoalNum = parseFloat(metaPessoal) || 0;
   const fatNum = parseFloat(faturamento) || 0;
   const salarioNum = parseFloat(salarioFixo) || 0;
   const diasUteisNum = parseFloat(diasUteis) || 1;
@@ -249,6 +250,7 @@ const Index = () => {
   const ticketMedio = qtdClientesNum > 0 ? fatNum / qtdClientesNum : 0;
 
   const atingimento = metaNum > 0 ? (fatNum / metaNum) * 100 : 0;
+  const atingimentoPessoal = metaPessoalNum > 0 ? (fatNum / metaPessoalNum) * 100 : 0;
   const aliquota = atingimento < 85 ? 0.5 : atingimento < 100 ? 0.75 : 1.0;
   const comissao = fatNum * (aliquota / 100);
   const dsr = (comissao / diasUteisNum) * domingosFeriadosNum;
@@ -260,6 +262,8 @@ const Index = () => {
 
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
+  const progressColorPessoal =
+    atingimentoPessoal >= 100 ? "bg-success" : atingimentoPessoal >= 85 ? "bg-warning" : "bg-destructive";
 
   const metaBatida = fatNum >= metaNum && metaNum > 0;
   const valorRestante = metaNum - fatNum;
