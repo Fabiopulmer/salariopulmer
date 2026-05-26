@@ -272,6 +272,7 @@ const Index = () => {
   const handleLimpar = () => {
     setMesReferencia("");
     setMeta("");
+    setMetaPessoal("");
     setFaturamento("");
     setSalarioFixo("2157.00");
     setDiasUteis("26");
