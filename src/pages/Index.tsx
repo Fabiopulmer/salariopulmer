@@ -174,6 +174,7 @@ const Index = () => {
     return `${mes}/${ano}`;
   });
   const [meta, setMeta] = useState("");
+  const [metaPessoal, setMetaPessoal] = useState("");
   const [faturamento, setFaturamento] = useState("");
   const [salarioFixo, setSalarioFixo] = useState("2157.00");
   const [diasUteis, setDiasUteis] = useState("26");
