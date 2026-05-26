@@ -174,6 +174,7 @@ const Index = () => {
     return `${mes}/${ano}`;
   });
   const [meta, setMeta] = useState("");
+  const [metaPessoal, setMetaPessoal] = useState("");
   const [faturamento, setFaturamento] = useState("");
   const [salarioFixo, setSalarioFixo] = useState("2157.00");
   const [diasUteis, setDiasUteis] = useState("26");
@@ -238,6 +239,7 @@ const Index = () => {
   }, [navigate]);
 
   const metaNum = parseFloat(meta) || 0;
+  const metaPessoalNum = parseFloat(metaPessoal) || 0;
   const fatNum = parseFloat(faturamento) || 0;
   const salarioNum = parseFloat(salarioFixo) || 0;
   const diasUteisNum = parseFloat(diasUteis) || 1;
@@ -248,6 +250,7 @@ const Index = () => {
   const ticketMedio = qtdClientesNum > 0 ? fatNum / qtdClientesNum : 0;
 
   const atingimento = metaNum > 0 ? (fatNum / metaNum) * 100 : 0;
+  const atingimentoPessoal = metaPessoalNum > 0 ? (fatNum / metaPessoalNum) * 100 : 0;
   const aliquota = atingimento < 85 ? 0.5 : atingimento < 100 ? 0.75 : 1.0;
   const comissao = fatNum * (aliquota / 100);
   const dsr = (comissao / diasUteisNum) * domingosFeriadosNum;
@@ -259,6 +262,8 @@ const Index = () => {
 
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
+  const progressColorPessoal =
+    atingimentoPessoal >= 100 ? "bg-success" : atingimentoPessoal >= 85 ? "bg-warning" : "bg-destructive";
 
   const metaBatida = fatNum >= metaNum && metaNum > 0;
   const valorRestante = metaNum - fatNum;
@@ -267,6 +272,7 @@ const Index = () => {
   const handleLimpar = () => {
     setMesReferencia("");
     setMeta("");
+    setMetaPessoal("");
     setFaturamento("");
     setSalarioFixo("2157.00");
     setDiasUteis("26");
@@ -404,6 +410,14 @@ const Index = () => {
                 <Input id="meta" type="number" placeholder="0,00" value={meta} onChange={(e) => setMeta(e.target.value)} />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="metaPessoal" className="flex items-center gap-1.5 text-highlight">
+                  <span className="inline-block h-2 w-2 rounded-full bg-highlight" />
+                  Meta Pessoal (R$)
+                </Label>
+                <Input id="metaPessoal" type="number" placeholder="0,00" value={metaPessoal} onChange={(e) => setMetaPessoal(e.target.value)} className="border-highlight/30 bg-highlight/5 focus-visible:ring-highlight" />
+                <p className="text-xs text-muted-foreground">Objetivo individual — não salvo no histórico</p>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="faturamento">Faturamento Realizado (R$)</Label>
                 <Input id="faturamento" type="number" placeholder="0,00" value={faturamento} onChange={(e) => setFaturamento(e.target.value)} />
               </div>
@@ -447,7 +461,7 @@ const Index = () => {
         </Card>
 
         {/* Result Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="border-none shadow-md">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -458,6 +472,25 @@ const Index = () => {
               <div className="mt-3 overflow-hidden rounded-full bg-secondary">
                 <div className={`h-2 rounded-full transition-all duration-500 ${progressColor}`} style={{ width: `${Math.min(atingimento, 100)}%` }} />
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md ring-1 ring-highlight/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-block h-2 w-2 rounded-full bg-highlight" />
+                  <p className="text-sm font-medium text-muted-foreground">Meta Pessoal</p>
+                </div>
+                <Target className="h-4 w-4 text-highlight" />
+              </div>
+              <p className="mt-2 text-3xl font-bold text-foreground">{atingimentoPessoal.toFixed(1)}%</p>
+              <div className="mt-3 overflow-hidden rounded-full bg-secondary">
+                <div className={`h-2 rounded-full transition-all duration-500 ${progressColorPessoal}`} style={{ width: `${Math.min(atingimentoPessoal, 100)}%` }} />
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {metaPessoalNum > 0 ? `${formatCurrency(fatNum)} de ${formatCurrency(metaPessoalNum)}` : "Defina sua meta pessoal"}
+              </p>
             </CardContent>
           </Card>
 
