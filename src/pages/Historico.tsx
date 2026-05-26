@@ -319,6 +319,7 @@ const Historico = () => {
                       <TableHead className="text-right">Faturamento</TableHead>
                       <TableHead className="text-right">% da Meta</TableHead>
                       <TableHead className="text-right">Comissão</TableHead>
+                      <TableHead className="text-right">Clientes Positivados</TableHead>
                       <TableHead className="text-right">Ticket Médio</TableHead>
                       <TableHead className="text-right">Salário Líquido</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
