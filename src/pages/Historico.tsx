@@ -339,6 +339,7 @@ const Historico = () => {
                             {pct.toFixed(1)}%
                           </TableCell>
                           <TableCell className="text-right">{formatCurrency(r.comissao_valor)}</TableCell>
+                          <TableCell className="text-right">{qtd}</TableCell>
                           <TableCell className="text-right">{formatCurrency(ticket)}</TableCell>
                           <TableCell className="text-right font-semibold">{formatCurrency(r.salario_liquido)}</TableCell>
                           <TableCell className="text-right">
