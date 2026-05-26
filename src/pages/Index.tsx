@@ -410,6 +410,14 @@ const Index = () => {
                 <Input id="meta" type="number" placeholder="0,00" value={meta} onChange={(e) => setMeta(e.target.value)} />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="metaPessoal" className="flex items-center gap-1.5 text-highlight">
+                  <span className="inline-block h-2 w-2 rounded-full bg-highlight" />
+                  Meta Pessoal (R$)
+                </Label>
+                <Input id="metaPessoal" type="number" placeholder="0,00" value={metaPessoal} onChange={(e) => setMetaPessoal(e.target.value)} className="border-highlight/30 bg-highlight/5 focus-visible:ring-highlight" />
+                <p className="text-xs text-muted-foreground">Objetivo individual — não salvo no histórico</p>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="faturamento">Faturamento Realizado (R$)</Label>
                 <Input id="faturamento" type="number" placeholder="0,00" value={faturamento} onChange={(e) => setFaturamento(e.target.value)} />
               </div>
