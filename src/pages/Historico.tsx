@@ -25,7 +25,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { ArrowLeft, BadgeCheck, Download, History, Target, Trash2, Trash } from "lucide-react";
+import { ArrowLeft, ArrowDown, ArrowUp, BadgeCheck, Download, History, Minus, Target, Trash2, Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -328,11 +328,18 @@ const Historico = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {registrosOrdenados.map((r) => {
+                    {registrosOrdenados.map((r, idx) => {
                       const pct = r.meta_mes > 0 ? (r.faturamento_total / r.meta_mes) * 100 : 0;
                       const batida = pct >= 100;
                       const qtd = Number(r.qtd_clientes) || 0;
                       const ticket = qtd > 0 ? r.faturamento_total / qtd : 0;
+                      // Comparativo de ticket médio com o mês anterior (mais antigo => idx+1)
+                      const anterior = registrosOrdenados[idx + 1];
+                      const qtdAnt = anterior ? Number(anterior.qtd_clientes) || 0 : 0;
+                      const ticketAnt = anterior && qtdAnt > 0 ? anterior.faturamento_total / qtdAnt : 0;
+                      const variouTicket = anterior && ticketAnt > 0 && ticket > 0;
+                      const subiuTicket = variouTicket && ticket > ticketAnt;
+                      const caiuTicket = variouTicket && ticket < ticketAnt;
                       return (
                         <TableRow key={r.id}>
                           <TableCell className="font-medium">{r.mes_referencia}</TableCell>
@@ -343,7 +350,26 @@ const Historico = () => {
                           </TableCell>
                           <TableCell className="text-right">{formatCurrency(r.comissao_valor)}</TableCell>
                           <TableCell className="text-right">{qtd}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(ticket)}</TableCell>
+                          <TableCell className="text-right">
+                            <span className="inline-flex items-center justify-end gap-1.5">
+                              {formatCurrency(ticket)}
+                              {subiuTicket && (
+                                <ArrowUp
+                                  className="h-3.5 w-3.5 text-success"
+                                  aria-label={`Subiu vs ${anterior?.mes_referencia}`}
+                                />
+                              )}
+                              {caiuTicket && (
+                                <ArrowDown
+                                  className="h-3.5 w-3.5 text-destructive"
+                                  aria-label={`Caiu vs ${anterior?.mes_referencia}`}
+                                />
+                              )}
+                              {variouTicket && ticket === ticketAnt && (
+                                <Minus className="h-3.5 w-3.5 text-muted-foreground" />
+                              )}
+                            </span>
+                          </TableCell>
                           <TableCell className="text-right font-semibold">{formatCurrency(r.salario_liquido)}</TableCell>
                           <TableCell className="text-right">
                             <AlertDialog>

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays, RotateCcw, BadgeCheck, Minus, Rocket, Flame, Save, LogOut, History } from "lucide-react";
+import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays, RotateCcw, BadgeCheck, Minus, Rocket, Flame, Save, LogOut, History, Sparkles, LineChart } from "lucide-react";
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -262,12 +262,21 @@ const Index = () => {
 
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
-  const progressColorPessoal =
-    atingimentoPessoal >= 100 ? "bg-success" : atingimentoPessoal >= 85 ? "bg-warning" : "bg-destructive";
+  const metaPessoalBatida = metaPessoalNum > 0 && fatNum >= metaPessoalNum;
+  const progressColorPessoal = metaPessoalBatida
+    ? "bg-yellow-400"
+    : atingimentoPessoal >= 85
+    ? "bg-warning"
+    : "bg-destructive";
 
   const metaBatida = fatNum >= metaNum && metaNum > 0;
   const valorRestante = metaNum - fatNum;
   const metaDiaria = diasUteisRestantesNum > 0 ? valorRestante / diasUteisRestantesNum : 0;
+
+  // Previsão de Fechamento: média/dia útil corrido × total de dias úteis do mês
+  const diasUteisDecorridos = Math.max(diasUteisNum - diasUteisRestantesNum, 0);
+  const mediaPorDiaUtil = diasUteisDecorridos > 0 ? fatNum / diasUteisDecorridos : 0;
+  const previsaoFechamento = mediaPorDiaUtil * diasUteisNum;
 
   const handleLimpar = () => {
     setMesReferencia("");
@@ -475,21 +484,31 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-md ring-1 ring-highlight/20">
+          <Card className={`border-none shadow-md ${metaPessoalBatida ? "ring-2 ring-yellow-400 bg-gradient-to-br from-yellow-400/20 via-amber-300/10 to-yellow-500/10 shadow-yellow-400/40" : "ring-1 ring-highlight/20"}`}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-highlight" />
-                  <p className="text-sm font-medium text-muted-foreground">Meta Pessoal</p>
+                  <span className={`inline-block h-2 w-2 rounded-full ${metaPessoalBatida ? "bg-yellow-400" : "bg-highlight"}`} />
+                  <p className={`text-sm font-medium ${metaPessoalBatida ? "text-yellow-500" : "text-muted-foreground"}`}>Meta Pessoal</p>
                 </div>
-                <Target className="h-4 w-4 text-highlight" />
+                {metaPessoalBatida ? (
+                  <Sparkles className="h-4 w-4 text-yellow-400 animate-pulse" />
+                ) : (
+                  <Target className="h-4 w-4 text-highlight" />
+                )}
               </div>
-              <p className="mt-2 text-3xl font-bold text-foreground">{atingimentoPessoal.toFixed(1)}%</p>
+              <p className={`mt-2 text-3xl font-bold ${metaPessoalBatida ? "text-yellow-500" : "text-foreground"}`}>
+                {atingimentoPessoal.toFixed(1)}%
+              </p>
               <div className="mt-3 overflow-hidden rounded-full bg-secondary">
                 <div className={`h-2 rounded-full transition-all duration-500 ${progressColorPessoal}`} style={{ width: `${Math.min(atingimentoPessoal, 100)}%` }} />
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {metaPessoalNum > 0 ? `${formatCurrency(fatNum)} de ${formatCurrency(metaPessoalNum)}` : "Defina sua meta pessoal"}
+              <p className={`mt-1 text-xs ${metaPessoalBatida ? "font-semibold text-yellow-500" : "text-muted-foreground"}`}>
+                {metaPessoalBatida
+                  ? `🎉 Meta pessoal alcançada!`
+                  : metaPessoalNum > 0
+                  ? `${formatCurrency(fatNum)} de ${formatCurrency(metaPessoalNum)}`
+                  : "Defina sua meta pessoal"}
               </p>
             </CardContent>
           </Card>
@@ -549,6 +568,21 @@ const Index = () => {
               <p className="mt-2 text-3xl font-bold text-foreground">{formatCurrency(ticketMedio)}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {qtdClientesNum > 0 ? `${formatCurrency(fatNum)} / ${qtdClientesNum} clientes` : "Informe a quantidade de clientes"}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md ring-1 ring-primary/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-muted-foreground">Previsão de Fechamento</p>
+                <LineChart className="h-4 w-4 text-primary" />
+              </div>
+              <p className="mt-2 text-3xl font-bold text-foreground">{formatCurrency(previsaoFechamento)}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {diasUteisDecorridos > 0
+                  ? `${formatCurrency(mediaPorDiaUtil)}/dia × ${diasUteisNum} dias úteis`
+                  : "Aguardando primeiro dia útil"}
               </p>
             </CardContent>
           </Card>
