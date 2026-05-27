@@ -477,6 +477,13 @@ const Index = () => {
           </CardContent>
         </Card>
 
+        {/* Acompanhamento Diário de Vendas */}
+        <AcompanhamentoDiario
+          userId={userId}
+          mesReferencia={mesReferencia}
+          onTotalChange={handleTotalDiarioChange}
+        />
+
         {/* Result Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="border-none shadow-md">
