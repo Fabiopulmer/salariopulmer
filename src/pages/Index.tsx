@@ -297,6 +297,13 @@ const Index = () => {
     navigate("/auth", { replace: true });
   };
 
+  const handleTotalDiarioChange = useCallback((total: number) => {
+    // Só sobrescreve se houver lançamentos diários (total > 0) — preserva edição manual quando vazio
+    if (total > 0) {
+      setFaturamento(total.toFixed(2));
+    }
+  }, []);
+
   // Recalcula dias úteis e domingos/feriados quando o Mês de Referência muda
   useEffect(() => {
     const parsed = parseMesAnoStr(mesReferencia);
