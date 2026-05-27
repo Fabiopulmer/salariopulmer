@@ -484,21 +484,31 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-md ring-1 ring-highlight/20">
+          <Card className={`border-none shadow-md ${metaPessoalBatida ? "ring-2 ring-yellow-400 bg-gradient-to-br from-yellow-400/20 via-amber-300/10 to-yellow-500/10 shadow-yellow-400/40" : "ring-1 ring-highlight/20"}`}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-highlight" />
-                  <p className="text-sm font-medium text-muted-foreground">Meta Pessoal</p>
+                  <span className={`inline-block h-2 w-2 rounded-full ${metaPessoalBatida ? "bg-yellow-400" : "bg-highlight"}`} />
+                  <p className={`text-sm font-medium ${metaPessoalBatida ? "text-yellow-500" : "text-muted-foreground"}`}>Meta Pessoal</p>
                 </div>
-                <Target className="h-4 w-4 text-highlight" />
+                {metaPessoalBatida ? (
+                  <Sparkles className="h-4 w-4 text-yellow-400 animate-pulse" />
+                ) : (
+                  <Target className="h-4 w-4 text-highlight" />
+                )}
               </div>
-              <p className="mt-2 text-3xl font-bold text-foreground">{atingimentoPessoal.toFixed(1)}%</p>
+              <p className={`mt-2 text-3xl font-bold ${metaPessoalBatida ? "text-yellow-500" : "text-foreground"}`}>
+                {atingimentoPessoal.toFixed(1)}%
+              </p>
               <div className="mt-3 overflow-hidden rounded-full bg-secondary">
                 <div className={`h-2 rounded-full transition-all duration-500 ${progressColorPessoal}`} style={{ width: `${Math.min(atingimentoPessoal, 100)}%` }} />
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {metaPessoalNum > 0 ? `${formatCurrency(fatNum)} de ${formatCurrency(metaPessoalNum)}` : "Defina sua meta pessoal"}
+              <p className={`mt-1 text-xs ${metaPessoalBatida ? "font-semibold text-yellow-500" : "text-muted-foreground"}`}>
+                {metaPessoalBatida
+                  ? `🎉 Meta pessoal alcançada!`
+                  : metaPessoalNum > 0
+                  ? `${formatCurrency(fatNum)} de ${formatCurrency(metaPessoalNum)}`
+                  : "Defina sua meta pessoal"}
               </p>
             </CardContent>
           </Card>
