@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import AcompanhamentoDiario from "@/components/AcompanhamentoDiario";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -296,6 +297,13 @@ const Index = () => {
     navigate("/auth", { replace: true });
   };
 
+  const handleTotalDiarioChange = useCallback((total: number) => {
+    // Só sobrescreve se houver lançamentos diários (total > 0) — preserva edição manual quando vazio
+    if (total > 0) {
+      setFaturamento(total.toFixed(2));
+    }
+  }, []);
+
   // Recalcula dias úteis e domingos/feriados quando o Mês de Referência muda
   useEffect(() => {
     const parsed = parseMesAnoStr(mesReferencia);
@@ -468,6 +476,13 @@ const Index = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Acompanhamento Diário de Vendas */}
+        <AcompanhamentoDiario
+          userId={userId}
+          mesReferencia={mesReferencia}
+          onTotalChange={handleTotalDiarioChange}
+        />
 
         {/* Result Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

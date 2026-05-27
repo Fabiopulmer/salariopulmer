@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      vendas_diarias: {
+        Row: {
+          created_at: string
+          dia: string
+          id: string
+          mes_referencia: string
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          dia: string
+          id?: string
+          mes_referencia: string
+          updated_at?: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string
+          dia?: string
+          id?: string
+          mes_referencia?: string
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       vendas_historico: {
         Row: {
           comissao_valor: number
