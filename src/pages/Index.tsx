@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays, RotateCcw, BadgeCheck, Minus, Rocket, Flame, Save, LogOut, History } from "lucide-react";
+import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays, RotateCcw, BadgeCheck, Minus, Rocket, Flame, Save, LogOut, History, Sparkles, LineChart } from "lucide-react";
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -262,12 +262,21 @@ const Index = () => {
 
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
-  const progressColorPessoal =
-    atingimentoPessoal >= 100 ? "bg-success" : atingimentoPessoal >= 85 ? "bg-warning" : "bg-destructive";
+  const metaPessoalBatida = metaPessoalNum > 0 && fatNum >= metaPessoalNum;
+  const progressColorPessoal = metaPessoalBatida
+    ? "bg-yellow-400"
+    : atingimentoPessoal >= 85
+    ? "bg-warning"
+    : "bg-destructive";
 
   const metaBatida = fatNum >= metaNum && metaNum > 0;
   const valorRestante = metaNum - fatNum;
   const metaDiaria = diasUteisRestantesNum > 0 ? valorRestante / diasUteisRestantesNum : 0;
+
+  // Previsão de Fechamento: média/dia útil corrido × total de dias úteis do mês
+  const diasUteisDecorridos = Math.max(diasUteisNum - diasUteisRestantesNum, 0);
+  const mediaPorDiaUtil = diasUteisDecorridos > 0 ? fatNum / diasUteisDecorridos : 0;
+  const previsaoFechamento = mediaPorDiaUtil * diasUteisNum;
 
   const handleLimpar = () => {
     setMesReferencia("");
