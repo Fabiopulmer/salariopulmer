@@ -571,6 +571,21 @@ const Index = () => {
               </p>
             </CardContent>
           </Card>
+
+          <Card className="border-none shadow-md ring-1 ring-primary/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-muted-foreground">Previsão de Fechamento</p>
+                <LineChart className="h-4 w-4 text-primary" />
+              </div>
+              <p className="mt-2 text-3xl font-bold text-foreground">{formatCurrency(previsaoFechamento)}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {diasUteisDecorridos > 0
+                  ? `${formatCurrency(mediaPorDiaUtil)}/dia × ${diasUteisNum} dias úteis`
+                  : "Aguardando primeiro dia útil"}
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Ritmo de Vendas */}
