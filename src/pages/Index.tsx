@@ -299,10 +299,8 @@ const Index = () => {
   };
 
   const handleTotalDiarioChange = useCallback((total: number) => {
-    // Só sobrescreve se houver lançamentos diários (total > 0) — preserva edição manual quando vazio
-    if (total > 0) {
-      setFaturamento(total.toFixed(2));
-    }
+    // Sempre sincroniza com o total do Acompanhamento Diário (fonte única da verdade)
+    setFaturamento(total.toFixed(2));
   }, []);
 
   // Recalcula dias úteis e domingos/feriados quando o Mês de Referência muda
@@ -438,7 +436,17 @@ const Index = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="faturamento">Faturamento Realizado (R$)</Label>
-                <Input id="faturamento" type="number" placeholder="0,00" value={faturamento} onChange={(e) => setFaturamento(e.target.value)} />
+                <Input
+                  id="faturamento"
+                  type="number"
+                  placeholder="0,00"
+                  value={faturamento}
+                  readOnly
+                  className="bg-muted/40 cursor-not-allowed"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Calculado automaticamente pelo Acompanhamento Diário abaixo.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="qtdClientes">Qtd. de Clientes com Compra</Label>
