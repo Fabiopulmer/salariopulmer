@@ -208,10 +208,9 @@ const Index = () => {
       setMesReferencia(registroMes.mes_referencia);
       setMeta(registroMes.meta_mes ? String(registroMes.meta_mes) : "");
       setMetaPessoal(registroMes.meta_pessoal ? String(registroMes.meta_pessoal) : "");
-      setFaturamento(registroMes.faturamento_total ? String(registroMes.faturamento_total) : "");
       setQtdClientes(String(registroMes.qtd_clientes ?? 0));
+      // NÃO carrega faturamento_total do banco — é derivado do Acompanhamento Diário (fonte única da verdade)
     } else {
-      setFaturamento("");
       setQtdClientes("0");
     }
   };
