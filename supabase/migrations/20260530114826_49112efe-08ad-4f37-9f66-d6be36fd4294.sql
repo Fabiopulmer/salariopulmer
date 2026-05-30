@@ -1,0 +1,1 @@
+ALTER TABLE public.vendas_historico ADD COLUMN IF NOT EXISTS meta_pessoal numeric NOT NULL DEFAULT 0;

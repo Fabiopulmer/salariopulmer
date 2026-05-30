@@ -200,13 +200,14 @@ const Index = () => {
     const mesAtual = `${String(hoje.getMonth() + 1).padStart(2, "0")}/${hoje.getFullYear()}`;
     const { data: registroMes } = await supabase
       .from("vendas_historico")
-      .select("mes_referencia, meta_mes, faturamento_total, qtd_clientes")
+      .select("mes_referencia, meta_mes, meta_pessoal, faturamento_total, qtd_clientes")
       .eq("user_id", uid)
       .eq("mes_referencia", mesAtual)
       .maybeSingle();
     if (registroMes) {
       setMesReferencia(registroMes.mes_referencia);
       setMeta(registroMes.meta_mes ? String(registroMes.meta_mes) : "");
+      setMetaPessoal(registroMes.meta_pessoal ? String(registroMes.meta_pessoal) : "");
       setFaturamento(registroMes.faturamento_total ? String(registroMes.faturamento_total) : "");
       setQtdClientes(String(registroMes.qtd_clientes ?? 0));
     } else {
@@ -346,6 +347,7 @@ const Index = () => {
         mes_referencia: mesKey,
         faturamento_total: fatNum,
         meta_mes: metaNum,
+        meta_pessoal: metaPessoalNum,
         comissao_valor: comissao,
         salario_liquido: salarioLiquido,
         salario_bruto: salarioBruto,
@@ -432,7 +434,7 @@ const Index = () => {
                   Meta Pessoal (R$)
                 </Label>
                 <Input id="metaPessoal" type="number" placeholder="0,00" value={metaPessoal} onChange={(e) => setMetaPessoal(e.target.value)} className="border-highlight/30 bg-highlight/5 focus-visible:ring-highlight" />
-                <p className="text-xs text-muted-foreground">Objetivo individual — não salvo no histórico</p>
+                <p className="text-xs text-muted-foreground">Objetivo individual — salvo no histórico do mês</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="faturamento">Faturamento Realizado (R$)</Label>

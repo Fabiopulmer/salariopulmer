@@ -43,6 +43,7 @@ type Registro = {
   mes_referencia: string;
   faturamento_total: number;
   meta_mes: number;
+  meta_pessoal: number;
   comissao_valor: number;
   salario_liquido: number;
   qtd_clientes: number;
@@ -68,7 +69,7 @@ const Historico = () => {
       setAuthChecked(true);
       const { data, error } = await supabase
         .from("vendas_historico")
-        .select("id, mes_referencia, faturamento_total, meta_mes, comissao_valor, salario_liquido, qtd_clientes, created_at")
+        .select("id, mes_referencia, faturamento_total, meta_mes, meta_pessoal, comissao_valor, salario_liquido, qtd_clientes, created_at")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: true });
       if (error) {
@@ -128,17 +129,19 @@ const Historico = () => {
       toast.error("Nenhum registro para exportar.");
       return;
     }
-    const header = ["Mes/Ano", "Meta do Mes", "Faturamento", "Meta", "% da Meta", "Comissao", "Salario Liquido", "Qtd Clientes", "Ticket Medio"];
+    const header = ["Mes/Ano", "Meta do Mes", "Meta Pessoal", "Faturamento", "% da Meta", "% Meta Pessoal", "Comissao", "Salario Liquido", "Qtd Clientes", "Ticket Medio"];
     const rows = registros.map((r) => {
       const pct = r.meta_mes > 0 ? ((r.faturamento_total / r.meta_mes) * 100).toFixed(1) : "0";
+      const pctPessoal = r.meta_pessoal > 0 ? ((r.faturamento_total / r.meta_pessoal) * 100).toFixed(1) : "0";
       const qtd = Number(r.qtd_clientes) || 0;
       const ticket = qtd > 0 ? r.faturamento_total / qtd : 0;
       return [
         r.mes_referencia,
         r.meta_mes.toFixed(2),
+        (r.meta_pessoal || 0).toFixed(2),
         r.faturamento_total.toFixed(2),
-        r.meta_mes.toFixed(2),
         pct,
+        pctPessoal,
         r.comissao_valor.toFixed(2),
         r.salario_liquido.toFixed(2),
         String(qtd),
@@ -318,6 +321,7 @@ const Historico = () => {
                   <TableRow>
                       <TableHead>Mês/Ano</TableHead>
                       <TableHead className="text-right">Meta do Mês</TableHead>
+                      <TableHead className="text-right">Meta Pessoal</TableHead>
                       <TableHead className="text-right">Faturamento</TableHead>
                       <TableHead className="text-right">% da Meta</TableHead>
                       <TableHead className="text-right">Comissão</TableHead>
@@ -344,6 +348,16 @@ const Historico = () => {
                         <TableRow key={r.id}>
                           <TableCell className="font-medium">{r.mes_referencia}</TableCell>
                           <TableCell className="text-right">{formatCurrency(r.meta_mes)}</TableCell>
+                          <TableCell className="text-right">
+                            {r.meta_pessoal > 0 ? (
+                              <span className={`font-medium ${r.faturamento_total >= r.meta_pessoal ? "text-yellow-500" : "text-muted-foreground"}`}>
+                                {formatCurrency(r.meta_pessoal)}
+                                {r.faturamento_total >= r.meta_pessoal && " 🎉"}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-right">{formatCurrency(r.faturamento_total)}</TableCell>
                           <TableCell className={`text-right font-medium ${batida ? "text-success" : "text-muted-foreground"}`}>
                             {pct.toFixed(1)}%

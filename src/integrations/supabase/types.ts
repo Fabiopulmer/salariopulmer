@@ -88,6 +88,7 @@ export type Database = {
           irrf: number
           mes_referencia: string
           meta_mes: number
+          meta_pessoal: number
           qtd_clientes: number
           salario_bruto: number
           salario_liquido: number
@@ -104,6 +105,7 @@ export type Database = {
           irrf?: number
           mes_referencia: string
           meta_mes?: number
+          meta_pessoal?: number
           qtd_clientes?: number
           salario_bruto?: number
           salario_liquido?: number
@@ -120,6 +122,7 @@ export type Database = {
           irrf?: number
           mes_referencia?: string
           meta_mes?: number
+          meta_pessoal?: number
           qtd_clientes?: number
           salario_bruto?: number
           salario_liquido?: number
