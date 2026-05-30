@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { recalcularLinha } from "@/lib/calculos";
 import {
   Table,
   TableBody,
@@ -48,6 +50,10 @@ type Registro = {
   salario_liquido: number;
   qtd_clientes: number;
   created_at: string;
+  salario_bruto: number;
+  inss: number;
+  irrf: number;
+  dsr: number;
 };
 
 const formatCurrency = (v: number) =>
@@ -69,7 +75,7 @@ const Historico = () => {
       setAuthChecked(true);
       const { data, error } = await supabase
         .from("vendas_historico")
-        .select("id, mes_referencia, faturamento_total, meta_mes, meta_pessoal, comissao_valor, salario_liquido, qtd_clientes, created_at")
+        .select("id, mes_referencia, faturamento_total, meta_mes, meta_pessoal, comissao_valor, salario_liquido, qtd_clientes, created_at, salario_bruto, inss, irrf, dsr")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: true });
       if (error) {
@@ -194,6 +200,45 @@ const Historico = () => {
     }
     setRegistros((prev) => prev.filter((r) => r.id !== registro.id));
     toast.success(`Registro de ${registro.mes_referencia} excluído!`);
+  };
+
+  // Atualiza Faturamento OU Qtd. Clientes de um registro, recalculando comissão,
+  // impostos e salário líquido a partir dos parâmetros já salvos na linha.
+  const handleAtualizarLinha = async (
+    registro: Registro,
+    campo: "faturamento_total" | "qtd_clientes",
+    novoValor: number
+  ) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth", { replace: true });
+      return;
+    }
+
+    const novoFaturamento = campo === "faturamento_total" ? novoValor : registro.faturamento_total;
+    const novaQtd = campo === "qtd_clientes" ? Math.max(Math.floor(novoValor), 0) : registro.qtd_clientes;
+
+    const recalc = recalcularLinha(registro, novoFaturamento);
+
+    const patch = {
+      faturamento_total: novoFaturamento,
+      qtd_clientes: novaQtd,
+      ...recalc,
+    };
+
+    const { error } = await supabase
+      .from("vendas_historico")
+      .update(patch)
+      .eq("user_id", session.user.id)
+      .eq("id", registro.id);
+
+    if (error) {
+      toast.error("Erro ao atualizar: " + error.message);
+      return;
+    }
+
+    setRegistros((prev) => prev.map((r) => (r.id === registro.id ? { ...r, ...patch } : r)));
+    toast.success("Linha atualizada e recalculada.");
   };
 
   if (!authChecked) {
