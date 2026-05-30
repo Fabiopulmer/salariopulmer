@@ -347,6 +347,7 @@ const Index = () => {
         mes_referencia: mesKey,
         faturamento_total: fatNum,
         meta_mes: metaNum,
+        meta_pessoal: metaPessoalNum,
         comissao_valor: comissao,
         salario_liquido: salarioLiquido,
         salario_bruto: salarioBruto,
