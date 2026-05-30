@@ -403,12 +403,54 @@ const Historico = () => {
                               <span className="text-muted-foreground">—</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">{formatCurrency(r.faturamento_total)}</TableCell>
+                          <TableCell className="text-right">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              defaultValue={Number(r.faturamento_total).toFixed(2)}
+                              key={`fat-${r.id}-${r.faturamento_total}`}
+                              className="h-8 w-32 ml-auto text-right"
+                              onBlur={(e) => {
+                                const v = parseFloat(e.target.value);
+                                if (isNaN(v) || v < 0) {
+                                  e.target.value = Number(r.faturamento_total).toFixed(2);
+                                  return;
+                                }
+                                if (v === Number(r.faturamento_total)) return;
+                                handleAtualizarLinha(r, "faturamento_total", v);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                              }}
+                            />
+                          </TableCell>
                           <TableCell className={`text-right font-medium ${batida ? "text-success" : "text-muted-foreground"}`}>
                             {pct.toFixed(1)}%
                           </TableCell>
                           <TableCell className="text-right">{formatCurrency(r.comissao_valor)}</TableCell>
-                          <TableCell className="text-right">{qtd}</TableCell>
+                          <TableCell className="text-right">
+                            <Input
+                              type="number"
+                              step="1"
+                              min="0"
+                              defaultValue={String(qtd)}
+                              key={`qtd-${r.id}-${qtd}`}
+                              className="h-8 w-20 ml-auto text-right"
+                              onBlur={(e) => {
+                                const v = parseInt(e.target.value, 10);
+                                if (isNaN(v) || v < 0) {
+                                  e.target.value = String(qtd);
+                                  return;
+                                }
+                                if (v === qtd) return;
+                                handleAtualizarLinha(r, "qtd_clientes", v);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                              }}
+                            />
+                          </TableCell>
                           <TableCell className="text-right">
                             <span className="inline-flex items-center justify-end gap-1.5">
                               {formatCurrency(ticket)}
