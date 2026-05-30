@@ -200,13 +200,14 @@ const Index = () => {
     const mesAtual = `${String(hoje.getMonth() + 1).padStart(2, "0")}/${hoje.getFullYear()}`;
     const { data: registroMes } = await supabase
       .from("vendas_historico")
-      .select("mes_referencia, meta_mes, faturamento_total, qtd_clientes")
+      .select("mes_referencia, meta_mes, meta_pessoal, faturamento_total, qtd_clientes")
       .eq("user_id", uid)
       .eq("mes_referencia", mesAtual)
       .maybeSingle();
     if (registroMes) {
       setMesReferencia(registroMes.mes_referencia);
       setMeta(registroMes.meta_mes ? String(registroMes.meta_mes) : "");
+      setMetaPessoal(registroMes.meta_pessoal ? String(registroMes.meta_pessoal) : "");
       setFaturamento(registroMes.faturamento_total ? String(registroMes.faturamento_total) : "");
       setQtdClientes(String(registroMes.qtd_clientes ?? 0));
     } else {
