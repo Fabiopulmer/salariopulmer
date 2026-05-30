@@ -433,7 +433,7 @@ const Index = () => {
                   Meta Pessoal (R$)
                 </Label>
                 <Input id="metaPessoal" type="number" placeholder="0,00" value={metaPessoal} onChange={(e) => setMetaPessoal(e.target.value)} className="border-highlight/30 bg-highlight/5 focus-visible:ring-highlight" />
-                <p className="text-xs text-muted-foreground">Objetivo individual — não salvo no histórico</p>
+                <p className="text-xs text-muted-foreground">Objetivo individual — salvo no histórico do mês</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="faturamento">Faturamento Realizado (R$)</Label>
