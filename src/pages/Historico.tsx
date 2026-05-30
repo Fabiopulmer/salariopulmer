@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { recalcularLinha } from "@/lib/calculos";
 import {
   Table,
   TableBody,
@@ -48,6 +50,10 @@ type Registro = {
   salario_liquido: number;
   qtd_clientes: number;
   created_at: string;
+  salario_bruto: number;
+  inss: number;
+  irrf: number;
+  dsr: number;
 };
 
 const formatCurrency = (v: number) =>
@@ -69,7 +75,7 @@ const Historico = () => {
       setAuthChecked(true);
       const { data, error } = await supabase
         .from("vendas_historico")
-        .select("id, mes_referencia, faturamento_total, meta_mes, meta_pessoal, comissao_valor, salario_liquido, qtd_clientes, created_at")
+        .select("id, mes_referencia, faturamento_total, meta_mes, meta_pessoal, comissao_valor, salario_liquido, qtd_clientes, created_at, salario_bruto, inss, irrf, dsr")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: true });
       if (error) {
@@ -194,6 +200,45 @@ const Historico = () => {
     }
     setRegistros((prev) => prev.filter((r) => r.id !== registro.id));
     toast.success(`Registro de ${registro.mes_referencia} excluído!`);
+  };
+
+  // Atualiza Faturamento OU Qtd. Clientes de um registro, recalculando comissão,
+  // impostos e salário líquido a partir dos parâmetros já salvos na linha.
+  const handleAtualizarLinha = async (
+    registro: Registro,
+    campo: "faturamento_total" | "qtd_clientes",
+    novoValor: number
+  ) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth", { replace: true });
+      return;
+    }
+
+    const novoFaturamento = campo === "faturamento_total" ? novoValor : registro.faturamento_total;
+    const novaQtd = campo === "qtd_clientes" ? Math.max(Math.floor(novoValor), 0) : registro.qtd_clientes;
+
+    const recalc = recalcularLinha(registro, novoFaturamento);
+
+    const patch = {
+      faturamento_total: novoFaturamento,
+      qtd_clientes: novaQtd,
+      ...recalc,
+    };
+
+    const { error } = await supabase
+      .from("vendas_historico")
+      .update(patch)
+      .eq("user_id", session.user.id)
+      .eq("id", registro.id);
+
+    if (error) {
+      toast.error("Erro ao atualizar: " + error.message);
+      return;
+    }
+
+    setRegistros((prev) => prev.map((r) => (r.id === registro.id ? { ...r, ...patch } : r)));
+    toast.success("Linha atualizada e recalculada.");
   };
 
   if (!authChecked) {
@@ -358,12 +403,54 @@ const Historico = () => {
                               <span className="text-muted-foreground">—</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">{formatCurrency(r.faturamento_total)}</TableCell>
+                          <TableCell className="text-right">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              defaultValue={Number(r.faturamento_total).toFixed(2)}
+                              key={`fat-${r.id}-${r.faturamento_total}`}
+                              className="h-8 w-32 ml-auto text-right"
+                              onBlur={(e) => {
+                                const v = parseFloat(e.target.value);
+                                if (isNaN(v) || v < 0) {
+                                  e.target.value = Number(r.faturamento_total).toFixed(2);
+                                  return;
+                                }
+                                if (v === Number(r.faturamento_total)) return;
+                                handleAtualizarLinha(r, "faturamento_total", v);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                              }}
+                            />
+                          </TableCell>
                           <TableCell className={`text-right font-medium ${batida ? "text-success" : "text-muted-foreground"}`}>
                             {pct.toFixed(1)}%
                           </TableCell>
                           <TableCell className="text-right">{formatCurrency(r.comissao_valor)}</TableCell>
-                          <TableCell className="text-right">{qtd}</TableCell>
+                          <TableCell className="text-right">
+                            <Input
+                              type="number"
+                              step="1"
+                              min="0"
+                              defaultValue={String(qtd)}
+                              key={`qtd-${r.id}-${qtd}`}
+                              className="h-8 w-20 ml-auto text-right"
+                              onBlur={(e) => {
+                                const v = parseInt(e.target.value, 10);
+                                if (isNaN(v) || v < 0) {
+                                  e.target.value = String(qtd);
+                                  return;
+                                }
+                                if (v === qtd) return;
+                                handleAtualizarLinha(r, "qtd_clientes", v);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                              }}
+                            />
+                          </TableCell>
                           <TableCell className="text-right">
                             <span className="inline-flex items-center justify-end gap-1.5">
                               {formatCurrency(ticket)}
