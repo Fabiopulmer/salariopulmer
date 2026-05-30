@@ -299,10 +299,8 @@ const Index = () => {
   };
 
   const handleTotalDiarioChange = useCallback((total: number) => {
-    // Só sobrescreve se houver lançamentos diários (total > 0) — preserva edição manual quando vazio
-    if (total > 0) {
-      setFaturamento(total.toFixed(2));
-    }
+    // Sempre sincroniza com o total do Acompanhamento Diário (fonte única da verdade)
+    setFaturamento(total.toFixed(2));
   }, []);
 
   // Recalcula dias úteis e domingos/feriados quando o Mês de Referência muda
