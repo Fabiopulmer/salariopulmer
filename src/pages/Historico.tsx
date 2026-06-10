@@ -79,7 +79,8 @@ const Historico = () => {
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: true });
       if (error) {
-        toast.error("Erro ao carregar histórico: " + error.message);
+        console.error("[historico load error]", error.message);
+        toast.error("Erro ao carregar histórico. Tente novamente.");
       } else {
         setRegistros((data ?? []) as Registro[]);
       }
@@ -176,7 +177,8 @@ const Historico = () => {
       .delete()
       .eq("user_id", session.user.id);
     if (error) {
-      toast.error("Erro ao apagar: " + error.message);
+      console.error("[historico delete all error]", error.message);
+      toast.error("Erro ao apagar histórico. Tente novamente.");
       return;
     }
     setRegistros([]);
@@ -195,7 +197,8 @@ const Historico = () => {
       .eq("user_id", session.user.id)
       .eq("id", registro.id);
     if (error) {
-      toast.error("Erro ao excluir: " + error.message);
+      console.error("[historico delete error]", error.message);
+      toast.error("Erro ao excluir registro. Tente novamente.");
       return;
     }
     setRegistros((prev) => prev.filter((r) => r.id !== registro.id));
@@ -233,7 +236,8 @@ const Historico = () => {
       .eq("id", registro.id);
 
     if (error) {
-      toast.error("Erro ao atualizar: " + error.message);
+      console.error("[historico update error]", error.message);
+      toast.error("Erro ao atualizar registro. Tente novamente.");
       return;
     }
 
