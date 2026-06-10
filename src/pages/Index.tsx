@@ -366,7 +366,8 @@ const Index = () => {
     );
     setSaving(false);
     if (error) {
-      toast.error("Erro ao salvar: " + error.message);
+      console.error("[save error]", error.message);
+      toast.error("Erro ao salvar o mês. Tente novamente.");
     } else {
       toast.success(`Mês ${mesReferencia} salvo com sucesso!`);
     }
