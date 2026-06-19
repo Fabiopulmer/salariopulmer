@@ -14,6 +14,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"auth" | "forgot">("auth");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -47,6 +48,17 @@ const Auth = () => {
     else toast.success("Conta criada! Verifique seu e-mail (ou faça login).");
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) toast.error(error.message);
+    else toast.success("Verifique seu e-mail para redefinir a senha");
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -57,6 +69,31 @@ const Auth = () => {
           <CardTitle>Calculadora de Salário</CardTitle>
         </CardHeader>
         <CardContent>
+          {mode === "forgot" ? (
+            <form onSubmit={handleForgotPassword} className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="email-forgot">E-mail cadastrado</Label>
+                <Input
+                  id="email-forgot"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Enviando..." : "Enviar link de recuperação"}
+              </Button>
+              <Button
+                type="button"
+                variant="link"
+                className="w-full"
+                onClick={() => setMode("auth")}
+              >
+                Voltar ao login
+              </Button>
+            </form>
+          ) : (
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Entrar</TabsTrigger>
@@ -74,6 +111,14 @@ const Auth = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Entrando..." : "Entrar"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="w-full"
+                  onClick={() => setMode("forgot")}
+                >
+                  Esqueci minha senha
                 </Button>
               </form>
             </TabsContent>
@@ -93,6 +138,7 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
+          )}
         </CardContent>
       </Card>
     </div>
