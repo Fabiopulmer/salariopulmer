@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import AcompanhamentoDiario from "@/components/AcompanhamentoDiario";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -209,10 +208,11 @@ const Index = () => {
       setMeta(registroMes.meta_mes ? String(registroMes.meta_mes) : "");
       setMetaPessoal(registroMes.meta_pessoal ? String(registroMes.meta_pessoal) : "");
       setQtdClientes(String(registroMes.qtd_clientes ?? 0));
-      // NÃO carrega faturamento_total do banco — é derivado do Acompanhamento Diário (fonte única da verdade)
+      setFaturamento(registroMes.faturamento_total ? String(registroMes.faturamento_total) : "");
     } else {
       setQtdClientes("0");
     }
+
   };
 
   useEffect(() => {
@@ -297,10 +297,8 @@ const Index = () => {
     navigate("/auth", { replace: true });
   };
 
-  const handleTotalDiarioChange = useCallback((total: number) => {
-    // Sempre sincroniza com o total do Acompanhamento Diário (fonte única da verdade)
-    setFaturamento(total.toFixed(2));
-  }, []);
+
+
 
   // Recalcula dias úteis e domingos/feriados quando o Mês de Referência muda
   useEffect(() => {
@@ -441,13 +439,10 @@ const Index = () => {
                   type="number"
                   placeholder="0,00"
                   value={faturamento}
-                  readOnly
-                  className="bg-muted/40 cursor-not-allowed"
+                  onChange={(e) => setFaturamento(e.target.value)}
                 />
-                <p className="text-[11px] text-muted-foreground">
-                  Calculado automaticamente pelo Acompanhamento Diário abaixo.
-                </p>
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="qtdClientes">Qtd. de Clientes com Compra</Label>
                 <Input
@@ -487,12 +482,8 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        {/* Acompanhamento Diário de Vendas */}
-        <AcompanhamentoDiario
-          userId={userId}
-          mesReferencia={mesReferencia}
-          onTotalChange={handleTotalDiarioChange}
-        />
+
+
 
         {/* Result Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
