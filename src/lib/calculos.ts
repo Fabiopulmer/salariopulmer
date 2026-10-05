@@ -101,3 +101,29 @@ export const recalcularLinha = (
     salario_liquido: salarioLiquido,
   };
 };
+// ===== 13º salário e férias com média da remuneração variável =====
+export type MesVariavel = { mes_referencia: string; comissao_valor: number; dsr: number };
+
+// Média de (comissão + DSR) dos meses salvos no mesmo ano.
+export const mediaVariavel = (meses: MesVariavel[], ano: number): number => {
+  const doAno = meses.filter((m) => m.mes_referencia.endsWith(`/${ano}`));
+  if (doAno.length === 0) return 0;
+  const soma = doAno.reduce((s, m) => s + (Number(m.comissao_valor) || 0) + (Number(m.dsr) || 0), 0);
+  return soma / doAno.length;
+};
+
+export const calcularDecimoEFerias = (salarioFixo: number, media: number) => {
+  const base = salarioFixo + media;
+  const decimoTotal = base;
+  const parcelaNovembro = decimoTotal / 2;
+  const inssDecimo = calcINSS(decimoTotal);
+  const irrfDecimo = calcIRRF(decimoTotal, inssDecimo);
+  const parcelaDezembro = decimoTotal - parcelaNovembro;
+  const parcelaDezembroLiquida = parcelaDezembro - inssDecimo - irrfDecimo;
+  const ferias = base;
+  const tercoFerias = base / 3;
+  return {
+    base, decimoTotal, parcelaNovembro, parcelaDezembro, inssDecimo, irrfDecimo,
+    parcelaDezembroLiquida, ferias, tercoFerias, totalFerias: ferias + tercoFerias,
+  };
+};
