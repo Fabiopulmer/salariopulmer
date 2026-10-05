@@ -812,12 +812,15 @@ const Index = () => {
                   <p className="font-semibold">Férias (Dezembro)</p>
                   <div className="flex justify-between"><span>Férias (fixo + média variável)</span><span>{formatCurrency(decimo.ferias)}</span></div>
                   <div className="flex justify-between"><span>(+) 1/3 constitucional</span><span>{formatCurrency(decimo.tercoFerias)}</span></div>
-                  <div className="flex justify-between border-t pt-2 font-bold text-highlight"><span>Total bruto de férias</span><span>{formatCurrency(decimo.totalFerias)}</span></div>
+                  <div className="flex justify-between border-t pt-2"><span>Total bruto de férias</span><span>{formatCurrency(decimo.totalFerias)}</span></div>
+                  <div className="flex justify-between text-muted-foreground"><span>(−) INSS sobre férias + 1/3</span><span>−{formatCurrency(decimo.inssFerias)}</span></div>
+                  <div className="flex justify-between text-muted-foreground"><span>(−) IRRF sobre férias + 1/3</span><span>{decimo.irrfFerias > 0 ? `−${formatCurrency(decimo.irrfFerias)}` : "Isento"}</span></div>
+                  <div className="flex justify-between border-t pt-2 font-bold text-highlight"><span>Férias líquidas</span><span>{formatCurrency(decimo.feriasLiquidas)}</span></div>
                 </div>
               )}
               <div className="rounded-lg bg-primary/10 p-3 text-sm font-semibold flex justify-between">
                 <span>Total a receber em {mesNumRef === 11 ? "Novembro" : "Dezembro"} (salário + extras)</span>
-                <span>{formatCurrency(salarioLiquido + (mesNumRef === 11 ? decimo.parcelaNovembro : decimo.parcelaDezembroLiquida + decimo.totalFerias))}</span>
+                <span>{formatCurrency(salarioLiquido + (mesNumRef === 11 ? decimo.parcelaNovembro : decimo.parcelaDezembroLiquida + decimo.feriasLiquidas))}</span>
               </div>
             </CardContent>
           </Card>

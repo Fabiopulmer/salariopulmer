@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mediaVariavel, calcularDecimoEFerias } from "@/lib/calculos";
+import { mediaVariavel, calcularDecimoEFerias, calcINSS, calcIRRF } from "@/lib/calculos";
 
 describe("13º e férias com média variável", () => {
   it("média usa comissão + DSR apenas dos meses do ano", () => {
@@ -20,5 +20,18 @@ describe("13º e férias com média variável", () => {
     const r = calcularDecimoEFerias(2157, 1800);
     expect(r.ferias).toBe(3957);
     expect(r.tercoFerias).toBeCloseTo(1319, 2);
+  });
+  it("férias líquidas descontam INSS e IRRF sobre férias + 1/3", () => {
+    const r = calcularDecimoEFerias(2157, 1800);
+    const bruto = 3957 + 1319;
+    expect(r.inssFerias).toBeCloseTo(calcINSS(bruto), 2);
+    expect(r.feriasLiquidas).toBeCloseTo(bruto - r.inssFerias - calcIRRF(bruto, r.inssFerias), 2);
+    expect(r.feriasLiquidas).toBeLessThan(bruto);
+  });
+  it("1ª parcela sem descontos; 2ª desconta INSS do 13º total", () => {
+    const r = calcularDecimoEFerias(2157, 1800);
+    expect(r.parcelaNovembro).toBe(1978.5);
+    expect(r.inssDecimo).toBeCloseTo(calcINSS(3957), 2);
+    expect(r.parcelaDezembroLiquida).toBeCloseTo(1978.5 - r.inssDecimo - r.irrfDecimo, 2);
   });
 });
