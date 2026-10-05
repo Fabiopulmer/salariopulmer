@@ -275,7 +275,7 @@ const Index = () => {
   const anoRef = refParsed?.ano ?? new Date().getFullYear();
   const mesesVar: MesVariavel[] = [
     ...historicoVar.filter((m) => m.mes_referencia !== mesReferencia),
-    { mes_referencia: mesReferencia, comissao_valor: comissao, dsr },
+    ...(comissao > 0 ? [{ mes_referencia: mesReferencia, comissao_valor: comissao, dsr }] : []),
   ];
   const mesesMedia = mesesVar.filter((m) => m.mes_referencia.endsWith(`/${anoRef}`)).length;
   const mediaVar = mediaVariavel(mesesVar, anoRef);
