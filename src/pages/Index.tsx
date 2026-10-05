@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Target, TrendingUp, DollarSign, Percent, Calculator, CalendarDays, RotateCcw, BadgeCheck, Minus, Rocket, Flame, Save, LogOut, History, Sparkles, LineChart } from "lucide-react";
+import { mediaVariavel, calcularDecimoEFerias, type MesVariavel } from "@/lib/calculos";
 
 const formatCurrency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -182,6 +183,7 @@ const Index = () => {
   const [diasUteisRestantes, setDiasUteisRestantes] = useState("10");
   const [outrosDescontos, setOutrosDescontos] = useState("0");
   const [qtdClientes, setQtdClientes] = useState("0");
+  const [historicoVar, setHistoricoVar] = useState<MesVariavel[]>([]);
 
   const loadUserData = async (uid: string) => {
     // 1) Configurações pessoais (salário fixo, outros descontos padrão)
@@ -212,6 +214,12 @@ const Index = () => {
     } else {
       setQtdClientes("0");
     }
+    const { data: hist } = await supabase
+      .from("vendas_historico")
+      .select("mes_referencia, comissao_valor, dsr")
+      .eq("user_id", uid);
+    if (hist) setHistoricoVar(hist as MesVariavel[]);
+
 
   };
 
@@ -260,6 +268,18 @@ const Index = () => {
   const inss = calcINSS(salarioBruto);
   const irrf = calcIRRF(salarioBruto, inss);
   const salarioLiquido = salarioBruto - inss - irrf - outrosDescontosNum;
+
+  // 13º e férias: média de comissão + DSR dos meses salvos no ano (mês atual usa valores da tela)
+  const refParsed = parseMesAnoStr(mesReferencia);
+  const mesNumRef = refParsed?.mes ?? 0;
+  const anoRef = refParsed?.ano ?? new Date().getFullYear();
+  const mesesVar: MesVariavel[] = [
+    ...historicoVar.filter((m) => m.mes_referencia !== mesReferencia),
+    { mes_referencia: mesReferencia, comissao_valor: comissao, dsr },
+  ];
+  const mesesMedia = mesesVar.filter((m) => m.mes_referencia.endsWith(`/${anoRef}`)).length;
+  const mediaVar = mediaVariavel(mesesVar, anoRef);
+  const decimo = calcularDecimoEFerias(salarioNum, mediaVar);
 
   const progressColor =
     atingimento >= 100 ? "bg-success" : atingimento >= 85 ? "bg-warning" : "bg-destructive";
@@ -749,6 +769,59 @@ const Index = () => {
             </div>
           </CardContent>
         </Card>
+
+        {(mesNumRef === 11 || mesNumRef === 12) && (
+          <Card className="border-2 border-highlight/30 shadow-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Sparkles className="h-5 w-5 text-highlight" />
+                {mesNumRef === 11 ? "13º Salário — 1ª parcela (Novembro)" : "13º Salário (2ª parcela) e Férias — Dezembro"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-lg bg-muted/50 p-3">
+                  <p className="text-xs text-muted-foreground">Salário fixo</p>
+                  <p className="text-lg font-bold">{formatCurrency(salarioNum)}</p>
+                </div>
+                <div className="rounded-lg bg-muted/50 p-3">
+                  <p className="text-xs text-muted-foreground">
+                    (+) Média variável (comissão + DSR) — {mesesMedia} {mesesMedia === 1 ? "mês" : "meses"}
+                  </p>
+                  <p className="text-lg font-bold">{formatCurrency(mediaVar)}</p>
+                </div>
+                <div className="rounded-lg bg-highlight/10 p-3">
+                  <p className="text-xs text-muted-foreground">(=) Base 13º / Férias</p>
+                  <p className="text-lg font-bold text-highlight">{formatCurrency(decimo.base)}</p>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between"><span>13º total</span><span className="font-semibold">{formatCurrency(decimo.decimoTotal)}</span></div>
+                <div className={`flex justify-between ${mesNumRef === 11 ? "font-bold text-highlight" : ""}`}>
+                  <span>1ª parcela — Novembro (50%, sem descontos)</span><span>{formatCurrency(decimo.parcelaNovembro)}</span>
+                </div>
+                <div className={`flex justify-between ${mesNumRef === 12 ? "font-bold text-highlight" : ""}`}>
+                  <span>2ª parcela — Dezembro (50%)</span><span>{formatCurrency(decimo.parcelaDezembro)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground"><span>(−) INSS sobre o 13º</span><span>−{formatCurrency(decimo.inssDecimo)}</span></div>
+                <div className="flex justify-between text-muted-foreground"><span>(−) IRRF sobre o 13º</span><span>{decimo.irrfDecimo > 0 ? `−${formatCurrency(decimo.irrfDecimo)}` : "Isento"}</span></div>
+                <div className="flex justify-between border-t pt-2 font-semibold"><span>2ª parcela líquida (Dezembro)</span><span>{formatCurrency(decimo.parcelaDezembroLiquida)}</span></div>
+              </div>
+              {mesNumRef === 12 && (
+                <div className="space-y-2 rounded-lg border border-highlight/30 p-3 text-sm">
+                  <p className="font-semibold">Férias (Dezembro)</p>
+                  <div className="flex justify-between"><span>Férias (fixo + média variável)</span><span>{formatCurrency(decimo.ferias)}</span></div>
+                  <div className="flex justify-between"><span>(+) 1/3 constitucional</span><span>{formatCurrency(decimo.tercoFerias)}</span></div>
+                  <div className="flex justify-between border-t pt-2 font-bold text-highlight"><span>Total bruto de férias</span><span>{formatCurrency(decimo.totalFerias)}</span></div>
+                </div>
+              )}
+              <div className="rounded-lg bg-primary/10 p-3 text-sm font-semibold flex justify-between">
+                <span>Total a receber em {mesNumRef === 11 ? "Novembro" : "Dezembro"} (salário + extras)</span>
+                <span>{formatCurrency(salarioLiquido + (mesNumRef === 11 ? decimo.parcelaNovembro : decimo.parcelaDezembroLiquida + decimo.totalFerias))}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Salvar Mês */}
         <Card className="border-dashed">
