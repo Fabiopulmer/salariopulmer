@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { recalcularLinha } from "@/lib/calculos";
+import { recalcularLinha, extrasDoMes } from "@/lib/calculos";
 import {
   Table,
   TableBody,
@@ -64,6 +64,7 @@ const Historico = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [registros, setRegistros] = useState<Registro[]>([]);
+  const [salarioFixo, setSalarioFixo] = useState(2157);
 
   useEffect(() => {
     const init = async () => {
@@ -78,6 +79,9 @@ const Historico = () => {
         .select("id, mes_referencia, faturamento_total, meta_mes, meta_pessoal, comissao_valor, salario_liquido, qtd_clientes, created_at, salario_bruto, inss, irrf, dsr")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: true });
+      const { data: cfg } = await supabase
+        .from("user_configuracoes").select("salario_fixo").eq("user_id", session.user.id).maybeSingle();
+      if (cfg?.salario_fixo) setSalarioFixo(Number(cfg.salario_fixo));
       if (error) {
         console.error("[historico load error]", error.message);
         toast.error("Erro ao carregar histórico. Tente novamente.");
@@ -120,9 +124,19 @@ const Historico = () => {
     return tickets.reduce((a, b) => a + b, 0) / tickets.length;
   }, [registros]);
 
+  const extrasPorMes = useMemo(() => {
+    const map: Record<string, { decimo: number; ferias: number }> = {};
+    for (const r of registros) map[r.mes_referencia] = extrasDoMes(r.mes_referencia, salarioFixo, registros);
+    return map;
+  }, [registros, salarioFixo]);
+
+  const totalExtras = Object.values(extrasPorMes).reduce((s, e) => s + e.decimo + e.ferias, 0);
+
   const chartData = [...registrosOrdenados].reverse().map((r) => ({
     mes: r.mes_referencia,
     liquido: Number(r.salario_liquido) || 0,
+    decimo: extrasPorMes[r.mes_referencia]?.decimo ?? 0,
+    ferias: extrasPorMes[r.mes_referencia]?.ferias ?? 0,
   }));
 
   const pieData = [
@@ -136,7 +150,7 @@ const Historico = () => {
       toast.error("Nenhum registro para exportar.");
       return;
     }
-    const header = ["Mes/Ano", "Meta do Mes", "Meta Pessoal", "Faturamento", "% da Meta", "% Meta Pessoal", "Comissao", "Salario Liquido", "Qtd Clientes", "Ticket Medio"];
+    const header = ["Mes/Ano", "Meta do Mes", "Meta Pessoal", "Faturamento", "% da Meta", "% Meta Pessoal", "Comissao", "Salario Liquido", "Qtd Clientes", "Ticket Medio", "13o Liquido", "Ferias Liquidas", "Total Recebido"];
     const rows = registros.map((r) => {
       const pct = r.meta_mes > 0 ? ((r.faturamento_total / r.meta_mes) * 100).toFixed(1) : "0";
       const pctPessoal = r.meta_pessoal > 0 ? ((r.faturamento_total / r.meta_pessoal) * 100).toFixed(1) : "0";
@@ -377,6 +391,8 @@ const Historico = () => {
                       <TableHead className="text-right">Clientes Positivados</TableHead>
                       <TableHead className="text-right">Ticket Médio</TableHead>
                       <TableHead className="text-right">Salário Líquido</TableHead>
+                      <TableHead className="text-right">13º + Férias (líq.)</TableHead>
+                      <TableHead className="text-right">Total Recebido</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -476,6 +492,12 @@ const Historico = () => {
                             </span>
                           </TableCell>
                           <TableCell className="text-right font-semibold">{formatCurrency(r.salario_liquido)}</TableCell>
+                          <TableCell className="text-right text-highlight">
+                            {(() => { const e = extrasPorMes[r.mes_referencia]; const v = e ? e.decimo + e.ferias : 0; return v > 0 ? formatCurrency(v) : "—"; })()}
+                          </TableCell>
+                          <TableCell className="text-right font-bold">
+                            {formatCurrency(Number(r.salario_liquido) + (extrasPorMes[r.mes_referencia]?.decimo ?? 0) + (extrasPorMes[r.mes_referencia]?.ferias ?? 0))}
+                          </TableCell>
                           <TableCell className="text-right">
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
@@ -538,7 +560,10 @@ const Historico = () => {
                             borderRadius: "0.5rem",
                           }}
                         />
-                        <Bar dataKey="liquido" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} name="Salário Líquido" />
+                        <Legend />
+                        <Bar dataKey="liquido" stackId="a" fill="hsl(var(--primary))" name="Salário Líquido" />
+                        <Bar dataKey="decimo" stackId="a" fill="hsl(var(--highlight))" name="13º (líq.)" />
+                        <Bar dataKey="ferias" stackId="a" fill="hsl(var(--success))" radius={[6, 6, 0, 0]} name="Férias (líq.)" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>

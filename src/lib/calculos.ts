@@ -122,8 +122,23 @@ export const calcularDecimoEFerias = (salarioFixo: number, media: number) => {
   const parcelaDezembroLiquida = parcelaDezembro - inssDecimo - irrfDecimo;
   const ferias = base;
   const tercoFerias = base / 3;
+  const brutoFerias = ferias + tercoFerias;
+  const inssFerias = calcINSS(brutoFerias);
+  const irrfFerias = calcIRRF(brutoFerias, inssFerias);
+  const feriasLiquidas = brutoFerias - inssFerias - irrfFerias;
   return {
+    inssFerias, irrfFerias, feriasLiquidas,
     base, decimoTotal, parcelaNovembro, parcelaDezembro, inssDecimo, irrfDecimo,
     parcelaDezembroLiquida, ferias, tercoFerias, totalFerias: ferias + tercoFerias,
   };
+};
+
+// Valores extras (líquidos) por mês: novembro = 1ª parcela; dezembro = 2ª parcela líquida + férias líquidas.
+export const extrasDoMes = (mesRef: string, salarioFixo: number, meses: MesVariavel[]) => {
+  const [m, a] = mesRef.split("/").map((x) => parseInt(x, 10));
+  if (m !== 11 && m !== 12) return { decimo: 0, ferias: 0 };
+  const r = calcularDecimoEFerias(salarioFixo, mediaVariavel(meses, a));
+  return m === 11
+    ? { decimo: r.parcelaNovembro, ferias: 0 }
+    : { decimo: r.parcelaDezembroLiquida, ferias: r.feriasLiquidas };
 };
