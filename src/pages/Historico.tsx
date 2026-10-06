@@ -167,6 +167,9 @@ const Historico = () => {
         r.salario_liquido.toFixed(2),
         String(qtd),
         ticket.toFixed(2),
+        (extrasPorMes[r.mes_referencia]?.decimo ?? 0).toFixed(2),
+        (extrasPorMes[r.mes_referencia]?.ferias ?? 0).toFixed(2),
+        (Number(r.salario_liquido) + (extrasPorMes[r.mes_referencia]?.decimo ?? 0) + (extrasPorMes[r.mes_referencia]?.ferias ?? 0)).toFixed(2),
       ].join(";");
     });
     const csv = [header.join(";"), ...rows].join("\n");
@@ -376,7 +379,7 @@ const Historico = () => {
             {/* Tabela */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Resumo Mensal</CardTitle>
+                <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-lg"><span>Resumo Mensal</span>{totalExtras > 0 && <span className="text-sm font-medium text-highlight">13º + Férias líquidos: {formatCurrency(totalExtras)}</span>}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
