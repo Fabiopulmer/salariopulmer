@@ -297,6 +297,35 @@ const Historico = () => {
               <Download className="h-4 w-4" />
               Exportar Histórico
             </Button>
+            <div className="flex items-center gap-1">
+              <select
+                aria-label="Ano do relatório"
+                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                value={anoRelatorio}
+                onChange={(e) => setAnoRelatorio(Number(e.target.value))}
+              >
+                {anosDisponiveis.map((a) => <option key={a} value={a}>{a}</option>)}
+              </select>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                disabled={registros.length === 0}
+                onClick={() =>
+                  gerarRelatorioAnualPdf(
+                    anoRelatorio,
+                    registros.map((r) => ({
+                      ...r,
+                      decimo: extrasPorMes[r.mes_referencia]?.decimo ?? 0,
+                      ferias: extrasPorMes[r.mes_referencia]?.ferias ?? 0,
+                    }))
+                  )
+                }
+              >
+                <FileText className="h-4 w-4" />
+                Relatório Anual (PDF)
+              </Button>
+            </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" size="sm" className="gap-2" disabled={registros.length === 0}>
