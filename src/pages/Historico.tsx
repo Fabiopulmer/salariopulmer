@@ -167,6 +167,9 @@ const Historico = () => {
         r.salario_liquido.toFixed(2),
         String(qtd),
         ticket.toFixed(2),
+        (extrasPorMes[r.mes_referencia]?.decimo ?? 0).toFixed(2),
+        (extrasPorMes[r.mes_referencia]?.ferias ?? 0).toFixed(2),
+        (Number(r.salario_liquido) + (extrasPorMes[r.mes_referencia]?.decimo ?? 0) + (extrasPorMes[r.mes_referencia]?.ferias ?? 0)).toFixed(2),
       ].join(";");
     });
     const csv = [header.join(";"), ...rows].join("\n");
