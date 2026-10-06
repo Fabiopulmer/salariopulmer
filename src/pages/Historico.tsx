@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { recalcularLinha, extrasDoMes } from "@/lib/calculos";
+import { gerarRelatorioAnualPdf } from "@/lib/relatorioPdf";
 import {
   Table,
   TableBody,
@@ -27,7 +28,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { ArrowLeft, ArrowDown, ArrowUp, BadgeCheck, Download, History, Minus, Target, Trash2, Trash } from "lucide-react";
+import { ArrowLeft, ArrowDown, ArrowUp, BadgeCheck, Download, History, Minus, Target, Trash2, Trash, FileText } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -129,6 +130,16 @@ const Historico = () => {
     for (const r of registros) map[r.mes_referencia] = extrasDoMes(r.mes_referencia, salarioFixo, registros);
     return map;
   }, [registros, salarioFixo]);
+
+  const anosDisponiveis = useMemo(() => {
+    const anos = Array.from(new Set(registros.map((r) => parseInt(r.mes_referencia.split("/")[1], 10)).filter(Boolean)));
+    if (!anos.length) anos.push(new Date().getFullYear());
+    return anos.sort((a, b) => b - a);
+  }, [registros]);
+  const [anoRelatorio, setAnoRelatorio] = useState(new Date().getFullYear());
+  useEffect(() => {
+    if (!anosDisponiveis.includes(anoRelatorio)) setAnoRelatorio(anosDisponiveis[0]);
+  }, [anosDisponiveis, anoRelatorio]);
 
   const totalExtras = Object.values(extrasPorMes).reduce((s, e) => s + e.decimo + e.ferias, 0);
 
