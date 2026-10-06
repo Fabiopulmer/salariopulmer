@@ -379,7 +379,7 @@ const Historico = () => {
             {/* Tabela */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Resumo Mensal</CardTitle>
+                <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-lg"><span>Resumo Mensal</span>{totalExtras > 0 && <span className="text-sm font-medium text-highlight">13º + Férias líquidos: {formatCurrency(totalExtras)}</span>}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
